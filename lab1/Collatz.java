@@ -2,8 +2,7 @@
  *  @author YOUR NAME HERE
  */
 public class Collatz {
-
-    /** Buggy implementation of nextNumber! */
+    /* Buggy implementation of nextNumber! 
     public static int nextNumber(int n) {
         if (n  == 128) {
             return 1;
@@ -12,8 +11,15 @@ public class Collatz {
         } else {
             return n * 2;
         }
-    }
-
+    } */
+    public static int nextNumber(int n){
+        if (n % 2 == 0) {
+            return n / 2;
+        }
+        else{
+            return n * 3 + 1;
+        }
+        }
     public static void main(String[] args) {
         int n = 5;
         System.out.print(n + " ");
