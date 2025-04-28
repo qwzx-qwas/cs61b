@@ -2,7 +2,7 @@
  *  @author YOUR NAME HERE
  */
 public class Collatz {
-    /* Buggy implementation of nextNumber! 
+    /* Buggy implementation of nextNumber!
     public static int nextNumber(int n) {
         if (n  == 128) {
             return 1;
