@@ -23,7 +23,7 @@ public class BuggyAList<Item> {
         items = (Item[]) new Object[1];
         size = 0;
     }
-
+    /*将数列中的内容复制到一个新的长度为capacity的数组里*/
     /** Resizes the underlying array to the target capacity. */
     private void resize(int capacity) {
         Item[] a = (Item[]) new Object[capacity];
@@ -60,7 +60,7 @@ public class BuggyAList<Item> {
       * returns deleted item. */
     public Item removeLast() {
         if ((size < items.length / 4) && (size > 4)) {
-            resize(size / 4);
+            resize(size * 2);
         }
         Item x = getLast();
         items[size - 1] = null;
