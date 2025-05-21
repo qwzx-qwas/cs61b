@@ -4,7 +4,7 @@ import org.junit.Test;
 
 public class LinkedListDeque<T> {
     //创建节点
-    private class Node<T>{
+    private class Node{
         //声明节点
         private T item;//节点的内容
         private LinkedListDeque.Node next;//指向下一个
@@ -21,13 +21,11 @@ public class LinkedListDeque<T> {
     private Node sentinel_tail;
     private int size;
     //创建一个新linked list deque
-    public LinkListDeque() {
+    public LinkedListDeque() {
         sentinel_head = new Node(null);//初始化sentinel变量
         sentinel_tail = new Node(null);
-        sentinel_head.next = sentinel_head;
-        sentinel_head.prev = sentinel_head;
-        sentinel_tail.prev = sentinel_tail;
-        sentinel_tail.next = sentinel_tail;
+        sentinel_head.next = sentinel_tail;
+        sentinel_tail.prev = sentinel_head;
         size = 0;
     }
 
@@ -44,6 +42,7 @@ public class LinkedListDeque<T> {
         newNode.next = sentinel_head.next;
         newNode.prev = sentinel_head;
         sentinel_head.next.prev = newNode;
+        sentinel_head.next = newNode;
         size++;
     }
     //添加末尾节点
@@ -51,12 +50,14 @@ public class LinkedListDeque<T> {
         Node newNode = new Node(item);
         newNode.prev = sentinel_tail.prev;
         sentinel_tail.prev.next = newNode;
+        newNode.next = sentinel_tail;
+        sentinel_tail.prev = newNode;
         size++;
     }
     //打印
     public void printDeque(){
         Node curr = sentinel_head.next;
-        while(curr != sentinel_tail){
+        while(curr.item != null ){
             System.out.print(curr.item + " ");
             curr = curr.next;
         }
@@ -107,6 +108,30 @@ public class LinkedListDeque<T> {
         }
         curr = curr.next;
         return getRecursive_helper(curr,index - 1);
+    }
+    @Test
+    public void testAddFirstAndRemoveFirst() {
+        LinkedListDeque<Integer> aa = new LinkedListDeque<>();
+        aa.addFirst(3);
+        aa.addFirst(2);
+        aa.addFirst(1);
+        aa.printDeque();
+        aa.addLast(4);
+        System.out.println("After addLast:");
+        aa.addLast(5);
+        aa.addLast(6);
+        System.out.println(aa.size());
+        aa.printDeque();
+
+        aa.removeFirst();
+        System.out.println(aa.get(2));
+        aa.removeFirst();
+        aa.removeLast();
+        System.out.println("After removeLast:");
+        aa.removeLast();
+
+        System.out.println(aa.size());
+        aa.printDeque();
     }
 }
 
