@@ -1,5 +1,6 @@
 package deque;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class LinkedListDeque<T> {
@@ -121,21 +122,21 @@ public class LinkedListDeque<T> {
         return getRecursive_helper(curr, index - 1);
     }
 
-    public Iterator<T> iterator() {
+    public Iterator iterator() {
         return new DequeIterator();
     }
 
-    private class DequeIterator {
+    private class DequeIterator implements Iterator<T> {
         private Node curr;
 
         public DequeIterator() {
             curr = sentinel_head.next;
         }
-
+        @Override
         public boolean hasNext() {
             return curr != sentinel_tail;
         }
-
+        @Override
         public T next() {
             if (!hasNext()) {
                 throw new NoSuchElementException();
