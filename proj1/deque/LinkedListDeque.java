@@ -1,25 +1,28 @@
 package deque;
 
-import org.junit.Test;
+import java.util.NoSuchElementException;
 
 public class LinkedListDeque<T> {
     //创建节点
-    private class Node{
+    private class Node {
         //声明节点
         private T item;//节点的内容
         private LinkedListDeque.Node next;//指向下一个
         private LinkedListDeque.Node prev;//指向上一个
+
         //初始化
-        public Node(T item){
+        public Node(T item) {
             this.item = item;
             this.next = null;
             this.prev = null;
         }
     }
+
     //声明
     private Node sentinel_head;
     private Node sentinel_tail;
     private int size;
+
     //创建一个新linked list deque
     public LinkedListDeque() {
         sentinel_head = new Node(null);//初始化sentinel变量
@@ -29,13 +32,14 @@ public class LinkedListDeque<T> {
         size = 0;
     }
 
-    public int size(){
+    public int size() {
         return size;
     }
 
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return size == 0;
     }
+
     //添加头节点
     public void addFirst(T item) {
         Node newNode = new Node(item);
@@ -45,6 +49,7 @@ public class LinkedListDeque<T> {
         sentinel_head.next = newNode;
         size++;
     }
+
     //添加末尾节点
     public void addLast(T item) {
         Node newNode = new Node(item);
@@ -54,18 +59,20 @@ public class LinkedListDeque<T> {
         sentinel_tail.prev = newNode;
         size++;
     }
+
     //打印
-    public void printDeque(){
+    public void printDeque() {
         Node curr = sentinel_head.next;
-        while(curr.item != null ){
+        while (curr.item != null) {
             System.out.print(curr.item + " ");
             curr = curr.next;
         }
         System.out.println();//光标换行
     }
+
     //删除头节点
-    public T removeFirst(){
-        if(isEmpty()){
+    public T removeFirst() {
+        if (isEmpty()) {
             return null;
         }
         Node first = sentinel_head.next;
@@ -74,9 +81,10 @@ public class LinkedListDeque<T> {
         size--;
         return (T) first.item;
     }
+
     //删除尾节点
-    public T removeLast(){
-        if(isEmpty()){
+    public T removeLast() {
+        if (isEmpty()) {
             return null;
         }
         Node last = sentinel_tail.prev;
@@ -85,6 +93,7 @@ public class LinkedListDeque<T> {
         size--;
         return (T) last.item;
     }
+
     //获得特定节点，用迭代
     public T get(int index) {
         if (index < 0 || index >= size) {
@@ -96,42 +105,66 @@ public class LinkedListDeque<T> {
         }
         return (T) curr.item;
     }
+
     public T getRecursive(int index) {
         if (index < 0 || index >= size) {
             return null;
         }
-        return (T)getRecursive_helper(sentinel_head.next,index);
+        return (T) getRecursive_helper(sentinel_head.next, index);
     }
+
     public T getRecursive_helper(Node curr, int index) {
         if (index == 0) {
             return (T) curr.item;
         }
         curr = curr.next;
-        return getRecursive_helper(curr,index - 1);
+        return getRecursive_helper(curr, index - 1);
     }
-    @Test
-    public void testAddFirstAndRemoveFirst() {
-        LinkedListDeque<Integer> aa = new LinkedListDeque<>();
-        aa.addFirst(3);
-        aa.addFirst(2);
-        aa.addFirst(1);
-        aa.printDeque();
-        aa.addLast(4);
-        System.out.println("After addLast:");
-        aa.addLast(5);
-        aa.addLast(6);
-        System.out.println(aa.size());
-        aa.printDeque();
 
-        aa.removeFirst();
-        System.out.println(aa.get(2));
-        aa.removeFirst();
-        aa.removeLast();
-        System.out.println("After removeLast:");
-        aa.removeLast();
+    public Iterator<T> iterator() {
+        return new DequeIterator();
+    }
 
-        System.out.println(aa.size());
-        aa.printDeque();
+    private class DequeIterator {
+        private Node curr;
+
+        public DequeIterator() {
+            curr = sentinel_head.next;
+        }
+
+        public boolean hasNext() {
+            return curr != sentinel_tail;
+        }
+
+        public T next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            T value = curr.item;
+            curr = curr.next;
+            return value;
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }else if (o == null) {
+            return false;
+        }else if (o.getClass() == this.getClass() && ((LinkedListDeque) o).size == this.size) {
+            LinkedListDeque other = (LinkedListDeque) o;
+            Node curr = this.sentinel_head.next;
+            Node curro = other.sentinel_head.next;
+            while (curr != sentinel_tail) {
+                if (!curr.item.equals(curro.item)) {
+                    return false;
+                }
+                curr = curr.next;
+                curro = curro.next;
+            }
+            return true;
+        }else{return false;}
     }
 }
 
