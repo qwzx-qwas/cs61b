@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 // 使用循环队列，避免了在执行 addFirst 等操作时，需将原来数组整体移动，而是采用滚动模式
-public class ArrayDeque<T> implements Deque<T> {
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private T[] items;
     private int head;      // 头指针
     private int tail;      // 尾指针
