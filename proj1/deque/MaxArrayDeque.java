@@ -19,12 +19,12 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
         }
         T maxitem = get(0);
         for (int i = 1; i < size(); i++) {
-            if (c.compare(get(i), maxitem) > 0) {
-                maxitem = get(i);
+            T tmp = get(i);
+            if (c.compare(tmp, maxitem) > 0) {
+                maxitem = tmp;
             }
         }
         return maxitem;
     }
 
 }
-

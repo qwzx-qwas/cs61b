@@ -50,17 +50,15 @@ public class ArrayDeque<T> implements Deque<T> {
 
     private void resize(int x) {
         T[] a = (T[]) new Object[x];
-        System.arraycopy(items, 0, a, 0, size);
+        for (int i = 0; i < size; i++) {
+            a[i] = items[(head + i) % capacity];
+        }
         //重置状态
         items = a;
         head = 0;
         tail = size - 1;
+        capacity = x;
     }
-
-    //isEmpty
-    /*public boolean isEmpty() {
-        return size == 0;
-    }*/
 
     //size()
     public int size() {
@@ -80,7 +78,7 @@ public class ArrayDeque<T> implements Deque<T> {
             return null;
         }
         if ((size < capacity / 4) && (size > 16)) {
-            resize(size * 2);
+            resize(size / 2);
         }
         T x = items[head];
         items[head] = null;
@@ -95,7 +93,7 @@ public class ArrayDeque<T> implements Deque<T> {
             return null;
         }
         if ((size < capacity / 4) && (size > 16)) {
-            resize(size * 2);
+            resize(size / 2);
         }
         T x = items[tail];
         items[tail] = null;
@@ -147,7 +145,7 @@ public class ArrayDeque<T> implements Deque<T> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ArrayDeque that = (ArrayDeque) o;
+        ArrayDeque that = (ArrayDeque<T>) o;
         if (size != that.size || head != that.head || tail != that.tail || capacity != that.capacity) {
             return false;
         } else {

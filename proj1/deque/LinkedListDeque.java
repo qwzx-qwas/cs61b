@@ -4,44 +4,36 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
-    //创建节点
     private class Node {
-        //声明节点
-        private T item;//节点的内容
-        private Node next;//指向下一个
-        private Node prev;//指向上一个
+        private T item;
+        private Node next;
+        private Node prev;
 
-        //初始化
-        public Node(T item) {
+        Node(T item) {
             this.item = item;
             this.next = null;
             this.prev = null;
         }
     }
 
-    //声明
     private Node sentinelHead;
     private Node sentinelTail;
     private int size;
 
-    //创建一个新linked list deque
     public LinkedListDeque() {
-        sentinelHead = new Node(null);//初始化sentinel变量
+        sentinelHead = new Node(null);
         sentinelTail = new Node(null);
         sentinelHead.next = sentinelTail;
         sentinelTail.prev = sentinelHead;
         size = 0;
     }
 
+    @Override
     public int size() {
         return size;
     }
 
-    /*public boolean isEmpty() {
-        return size == 0;
-    }*/
-
-    //添加头节点
+    @Override
     public void addFirst(T item) {
         Node newNode = new Node(item);
         newNode.next = sentinelHead.next;
@@ -51,7 +43,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         size++;
     }
 
-    //添加末尾节点
+    @Override
     public void addLast(T item) {
         Node newNode = new Node(item);
         newNode.prev = sentinelTail.prev;
@@ -61,17 +53,17 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         size++;
     }
 
-    //打印
+    @Override
     public void printDeque() {
         Node curr = sentinelHead.next;
-        while (curr!= sentinelTail) {
+        while (curr != sentinelTail) {
             System.out.print(curr.item + " ");
             curr = curr.next;
         }
-        System.out.println();//光标换行
+        System.out.println();
     }
 
-    //删除头节点
+    @Override
     public T removeFirst() {
         if (isEmpty()) {
             return null;
@@ -80,10 +72,10 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         sentinelHead.next = first.next;
         first.next.prev = sentinelHead;
         size--;
-        return (T) first.item;
+        return first.item;
     }
 
-    //删除尾节点
+    @Override
     public T removeLast() {
         if (isEmpty()) {
             return null;
@@ -92,10 +84,10 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         last.prev.next = sentinelTail;
         sentinelTail.prev = last.prev;
         size--;
-        return (T) last.item;
+        return last.item;
     }
 
-    //获得特定节点，用迭代
+    @Override
     public T get(int index) {
         if (index < 0 || index >= size) {
             return null;
@@ -104,32 +96,32 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         for (int i = 0; i < index; i++) {
             curr = curr.next;
         }
-        return (T) curr.item;
+        return curr.item;
     }
 
-    private T getRecursive(int index) {
+    public T getRecursive(int index) {
         if (index < 0 || index >= size) {
             return null;
         }
-        return (T) getRecursiveHelper(sentinelHead.next, index);
+        return getRecursiveHelper(sentinelHead.next, index);
     }
 
     private T getRecursiveHelper(Node curr, int index) {
         if (index == 0) {
-            return (T) curr.item;
+            return curr.item;
         }
-        curr = curr.next;
-        return getRecursiveHelper(curr, index - 1);
+        return getRecursiveHelper(curr.next, index - 1);
     }
 
-    public Iterator <T> iterator() {
+    @Override
+    public Iterator<T> iterator() {
         return new DequeIterator();
     }
 
     private class DequeIterator implements Iterator<T> {
         private Node curr;
 
-        public DequeIterator() {
+        DequeIterator() {
             curr = sentinelHead.next;
         }
 
@@ -173,5 +165,6 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         }
     }
 }
+
 
 
