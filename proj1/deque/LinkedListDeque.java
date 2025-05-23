@@ -147,17 +147,17 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
             return true;
         } else if (o == null) {
             return false;
-        } else if (o instanceof Deque
-                && ((LinkedListDeque<T>) o).size == this.size) {
-            LinkedListDeque<T> other = (LinkedListDeque<T>) o;
-            Node curr = this.sentinelHead.next;
-            Node curro = other.sentinelHead.next;
-            while (curr != sentinelTail) {
-                if (!curr.item.equals(curro.item)) {
+        } else if (o instanceof Deque) {
+            return false;
+        }
+        Deque<?> other = (Deque<?>) o;
+        if (other.size() == this.size()) {
+            for (int i = 0; i < this.size(); i++) {
+                Object thisItem = this.get(i);
+                Object otherItem = other.get(i);
+                if (!thisItem.equals(otherItem)) {
                     return false;
                 }
-                curr = curr.next;
-                curro = curro.next;
             }
             return true;
         } else {
