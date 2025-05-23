@@ -1,5 +1,7 @@
 package deque;
 
+import java.util.Iterator;
+
 public interface Deque<T> {
     void addFirst(T element);
 
@@ -18,4 +20,6 @@ public interface Deque<T> {
     default boolean isEmpty() {
         return size() == 0;
     }
+
+    Iterator<T> iterator();
 }

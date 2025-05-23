@@ -24,7 +24,8 @@ public class GuitarString {
         //       Your should initially fill your buffer array with zeros.
         buffer = new LinkedListDeque<>();//不能把赋值语句放到类里
         int capacity = (int)Math.round(SR / frequency);
-        for(int i = 0; i < capacity; i++){
+
+        for (int i = 0; i < capacity; i++) {
             buffer.addLast(0.0);
         }
     }
@@ -40,7 +41,7 @@ public class GuitarString {
         //       other. This does not mean that you need to check that the numbers
         //       are different from each other. It means you should repeatedly call
         //       Math.random() - 0.5 to generate new random numbers for each array index.
-        for(int i = 0;i < buffer.size();i++){
+        for (int i = 0;i < buffer.size();i++) {
             double r = Math.random() - 0.5;
             buffer.removeFirst();
             buffer.addLast(r);
@@ -66,4 +67,4 @@ public class GuitarString {
         return buffer.get(0);
     }
 }
-    // TODO: Remove all comments that say TODO when you're done.
+    //  Remove all comments that say  when you're done.

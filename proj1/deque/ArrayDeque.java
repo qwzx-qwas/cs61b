@@ -3,19 +3,23 @@ package deque;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 //使用循环队列，避免了在执行addfirst等操作时，需将原来数组整体移动，而是采用滚动模式crud
-public class ArrayDeque<T> implements Deque<T> {
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private T[] items;
-    private int head;//头指针
-    private int tail;//尾指针
+    //头指针
+    private int head;
+    //尾指针
+    private int tail;
     private int size;
-    private int capacity;//容量
+    //容量
+    private int capacity;
 
     //初始化
     public ArrayDeque() {
         capacity = 8;
         items = (T[]) new Object[capacity];
         head = 0;
-        tail = -1;//当添加第一个指针时，tail向后移动到0
+        //当添加第一个指针时，tail向后移动到0
+        tail = -1;
         size = 0;
     }
 
@@ -25,7 +29,7 @@ public class ArrayDeque<T> implements Deque<T> {
             resize(size * 2);
         }
         head = (head - 1 + capacity) % capacity;//头指针向前滚动
-        if(size == 0){
+        if (size == 0){
             tail = head;
         }
         items[head] = x;
@@ -37,8 +41,8 @@ public class ArrayDeque<T> implements Deque<T> {
         if (size == capacity) {
             resize(size * 2);
         }
-
-        tail = (tail + 1 + capacity) % capacity;//尾指针向后滚动
+        //尾指针向后滚动
+        tail = (tail + 1 + capacity) % capacity;
         items[tail] = x;
         size++;
     }
@@ -71,7 +75,7 @@ public class ArrayDeque<T> implements Deque<T> {
 
     //removeFirst
     public T removeFirst() {
-        if(isEmpty()){
+        if (isEmpty()){
             return null;
         }
         if ((size < capacity / 4) && (size > 16)) {
@@ -86,7 +90,7 @@ public class ArrayDeque<T> implements Deque<T> {
 
     //removeLast
     public T removeLast() {
-        if(isEmpty()){
+        if (isEmpty()){
             return null;
         }
         if ((size < capacity / 4) && (size > 16)) {
@@ -137,9 +141,14 @@ public class ArrayDeque<T> implements Deque<T> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ArrayDeque that = (ArrayDeque) o;
-        if (size != that.size || head != that.head || tail != that.tail || capacity != that.capacity) {
+        if (size != that.size
+                || head != that.head
+                || tail != that.tail
+                || capacity != that.capacity) {
             return false;
         } else {
             for (int i = 0; i < size; i++) {

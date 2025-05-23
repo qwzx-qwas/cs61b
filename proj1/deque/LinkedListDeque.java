@@ -3,7 +3,7 @@ package deque;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class LinkedListDeque<T> implements Deque<T> {
+public class LinkedListDeque<T> implements Deque<T> ,Iterable<T> {
     //创建节点
     private class Node {
         //声明节点
@@ -20,16 +20,16 @@ public class LinkedListDeque<T> implements Deque<T> {
     }
 
     //声明
-    private Node sentinel_head;
-    private Node sentinel_tail;
+    private Node sentinelHead;
+    private Node sentinelTail;
     private int size;
 
     //创建一个新linked list deque
     public LinkedListDeque() {
-        sentinel_head = new Node(null);//初始化sentinel变量
-        sentinel_tail = new Node(null);
-        sentinel_head.next = sentinel_tail;
-        sentinel_tail.prev = sentinel_head;
+        sentinelHead = new Node(null);//初始化sentinel变量
+        sentinelTail = new Node(null);
+        sentinelHead.next = sentinelTail;
+        sentinelTail.prev = sentinelHead;
         size = 0;
     }
 
@@ -44,26 +44,26 @@ public class LinkedListDeque<T> implements Deque<T> {
     //添加头节点
     public void addFirst(T item) {
         Node newNode = new Node(item);
-        newNode.next = sentinel_head.next;
-        newNode.prev = sentinel_head;
-        sentinel_head.next.prev = newNode;
-        sentinel_head.next = newNode;
+        newNode.next = sentinelHead.next;
+        newNode.prev = sentinelHead;
+        sentinelHead.next.prev = newNode;
+        sentinelHead.next = newNode;
         size++;
     }
 
     //添加末尾节点
     public void addLast(T item) {
         Node newNode = new Node(item);
-        newNode.prev = sentinel_tail.prev;
-        sentinel_tail.prev.next = newNode;
-        newNode.next = sentinel_tail;
-        sentinel_tail.prev = newNode;
+        newNode.prev = sentinelTail.prev;
+        sentinelTail.prev.next = newNode;
+        newNode.next = sentinelTail;
+        sentinelTail.prev = newNode;
         size++;
     }
 
     //打印
     public void printDeque() {
-        Node curr = sentinel_head.next;
+        Node curr = sentinelHead.next;
         while (curr.item != null) {
             System.out.print(curr.item + " ");
             curr = curr.next;
@@ -76,9 +76,9 @@ public class LinkedListDeque<T> implements Deque<T> {
         if (isEmpty()) {
             return null;
         }
-        Node first = sentinel_head.next;
-        sentinel_head.next = first.next;
-        first.next.prev = sentinel_head;
+        Node first = sentinelHead.next;
+        sentinelHead.next = first.next;
+        first.next.prev = sentinelHead;
         size--;
         return (T) first.item;
     }
@@ -88,9 +88,9 @@ public class LinkedListDeque<T> implements Deque<T> {
         if (isEmpty()) {
             return null;
         }
-        Node last = sentinel_tail.prev;
-        last.prev.next = sentinel_tail;
-        sentinel_tail.prev = last.prev;
+        Node last = sentinelTail.prev;
+        last.prev.next = sentinelTail;
+        sentinelTail.prev = last.prev;
         size--;
         return (T) last.item;
     }
@@ -100,7 +100,7 @@ public class LinkedListDeque<T> implements Deque<T> {
         if (index < 0 || index >= size) {
             return null;
         }
-        Node curr = sentinel_head.next;
+        Node curr = sentinelHead.next;
         for (int i = 0; i < index; i++) {
             curr = curr.next;
         }
@@ -111,18 +111,18 @@ public class LinkedListDeque<T> implements Deque<T> {
         if (index < 0 || index >= size) {
             return null;
         }
-        return (T) getRecursive_helper(sentinel_head.next, index);
+        return (T) getRecursiveHelper(sentinelHead.next, index);
     }
 
-    public T getRecursive_helper(Node curr, int index) {
+    private T getRecursiveHelper(Node curr, int index) {
         if (index == 0) {
             return (T) curr.item;
         }
         curr = curr.next;
-        return getRecursive_helper(curr, index - 1);
+        return getRecursiveHelper(curr, index - 1);
     }
 
-    public Iterator iterator() {
+    public Iterator<T> iterator() {
         return new DequeIterator();
     }
 
@@ -130,11 +130,11 @@ public class LinkedListDeque<T> implements Deque<T> {
         private Node curr;
 
         public DequeIterator() {
-            curr = sentinel_head.next;
+            curr = sentinelHead.next;
         }
         @Override
         public boolean hasNext() {
-            return curr != sentinel_tail;
+            return curr != sentinelTail;
         }
         @Override
         public T next() {
@@ -151,13 +151,14 @@ public class LinkedListDeque<T> implements Deque<T> {
     public boolean equals(Object o) {
         if (o == this) {
             return true;
-        }else if (o == null) {
+        } else if (o == null) {
             return false;
-        }else if (o.getClass() == this.getClass() && ((LinkedListDeque) o).size == this.size) {
+        } else if (o.getClass() == this.getClass()
+                && ((LinkedListDeque) o).size == this.size) {
             LinkedListDeque other = (LinkedListDeque) o;
-            Node curr = this.sentinel_head.next;
-            Node curro = other.sentinel_head.next;
-            while (curr != sentinel_tail) {
+            Node curr = this.sentinelHead.next;
+            Node curro = other.sentinelHead.next;
+            while (curr != sentinelTail) {
                 if (!curr.item.equals(curro.item)) {
                     return false;
                 }
@@ -165,7 +166,9 @@ public class LinkedListDeque<T> implements Deque<T> {
                 curro = curro.next;
             }
             return true;
-        }else{return false;}
+        } else {
+            return false;
+        }
     }
 }
 
