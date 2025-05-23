@@ -3,7 +3,7 @@ package deque;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class LinkedListDeque<T> {
+public class LinkedListDeque<T> implements Deque<T> {
     //创建节点
     private class Node {
         //声明节点
@@ -37,9 +37,9 @@ public class LinkedListDeque<T> {
         return size;
     }
 
-    public boolean isEmpty() {
+    /*public boolean isEmpty() {
         return size == 0;
-    }
+    }*/
 
     //添加头节点
     public void addFirst(T item) {

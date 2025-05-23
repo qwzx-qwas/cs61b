@@ -3,7 +3,7 @@ package deque;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 //使用循环队列，避免了在执行addfirst等操作时，需将原来数组整体移动，而是采用滚动模式crud
-public class ArrayDeque<T> {
+public class ArrayDeque<T> implements Deque<T> {
     private T[] items;
     private int head;//头指针
     private int tail;//尾指针
@@ -25,6 +25,9 @@ public class ArrayDeque<T> {
             resize(size * 2);
         }
         head = (head - 1 + capacity) % capacity;//头指针向前滚动
+        if(size == 0){
+            tail = head;
+        }
         items[head] = x;
         size++;
     }
@@ -34,6 +37,7 @@ public class ArrayDeque<T> {
         if (size == capacity) {
             resize(size * 2);
         }
+
         tail = (tail + 1 + capacity) % capacity;//尾指针向后滚动
         items[tail] = x;
         size++;
@@ -49,9 +53,9 @@ public class ArrayDeque<T> {
     }
 
     //isEmpty
-    public boolean isEmpty() {
+    /*public boolean isEmpty() {
         return size == 0;
-    }
+    }*/
 
     //size()
     public int size() {
@@ -61,12 +65,15 @@ public class ArrayDeque<T> {
     //printDeque
     public void printDeque() {
         for (int i = 0; i < size; i++) {
-            System.out.print(items[i] + " ");
+            System.out.print(items[(head + i) % capacity] + " ");
         }
     }
 
     //removeFirst
     public T removeFirst() {
+        if(isEmpty()){
+            return null;
+        }
         if ((size < capacity / 4) && (size > 16)) {
             resize(size * 2);
         }
@@ -79,6 +86,9 @@ public class ArrayDeque<T> {
 
     //removeLast
     public T removeLast() {
+        if(isEmpty()){
+            return null;
+        }
         if ((size < capacity / 4) && (size > 16)) {
             resize(size * 2);
         }
