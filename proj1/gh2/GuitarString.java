@@ -1,21 +1,25 @@
 package gh2;
 
 //  uncomment the following import once you're ready to start this portion
+
 import deque.Deque;
 import deque.LinkedListDeque;
 //  maybe more imports
 
 //Note: This file will not compile until you complete the Deque implementations
 public class GuitarString {
-    /** Constants. Do not change. In case you're curious, the keyword final
+    /**
+     * Constants. Do not change. In case you're curious, the keyword final
      * means the values cannot be changed at runtime. We'll discuss this and
-     * other topics in lecture on Friday. */
+     * other topics in lecture on Friday.
+     */
     private static final int SR = 44100;      // Sampling Rate
     private static final double DECAY = .996; // energy decay factor
 
     /* Buffer for storing sound data. */
     //  uncomment the following line once you're ready to start this portion
-     private Deque<Double> buffer;
+    private Deque<Double> buffer;
+
     /* Create a guitar string of the given frequency.  */
     public GuitarString(double frequency) {
         //  Create a buffer with capacity = SR / frequency. You'll need to
@@ -23,7 +27,7 @@ public class GuitarString {
         //       better accuracy, use the Math.round() function before casting.
         //       Your should initially fill your buffer array with zeros.
         buffer = new LinkedListDeque<>();//不能把赋值语句放到类里
-        int capacity = (int)Math.round(SR / frequency);
+        int capacity = (int) Math.round(SR / frequency);
 
         for (int i = 0; i < capacity; i++) {
             buffer.addLast(0.0);
@@ -41,7 +45,7 @@ public class GuitarString {
         //       other. This does not mean that you need to check that the numbers
         //       are different from each other. It means you should repeatedly call
         //       Math.random() - 0.5 to generate new random numbers for each array index.
-        for (int i = 0;i < buffer.size();i++) {
+        for (int i = 0; i < buffer.size(); i++) {
             double r = Math.random() - 0.5;
             buffer.removeFirst();
             buffer.addLast(r);
@@ -67,4 +71,4 @@ public class GuitarString {
         return buffer.get(0);
     }
 }
-    //  Remove all comments that say  when you're done.
+//  Remove all comments that say  when you're done.

@@ -3,7 +3,7 @@ package deque;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class LinkedListDeque<T> implements Deque<T> ,Iterable<T> {
+public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     //创建节点
     private class Node {
         //声明节点
@@ -122,7 +122,7 @@ public class LinkedListDeque<T> implements Deque<T> ,Iterable<T> {
         return getRecursiveHelper(curr, index - 1);
     }
 
-    public Iterator<T> iterator() {
+    public Iterator <T> iterator() {
         return new DequeIterator();
     }
 
@@ -132,10 +132,12 @@ public class LinkedListDeque<T> implements Deque<T> ,Iterable<T> {
         public DequeIterator() {
             curr = sentinelHead.next;
         }
+
         @Override
         public boolean hasNext() {
             return curr != sentinelTail;
         }
+
         @Override
         public T next() {
             if (!hasNext()) {
@@ -171,4 +173,5 @@ public class LinkedListDeque<T> implements Deque<T> ,Iterable<T> {
         }
     }
 }
+
 

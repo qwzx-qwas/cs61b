@@ -2,6 +2,7 @@ package deque;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+
 //使用循环队列，避免了在执行addfirst等操作时，需将原来数组整体移动，而是采用滚动模式crud
 public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private T[] items;
@@ -29,7 +30,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             resize(size * 2);
         }
         head = (head - 1 + capacity) % capacity;//头指针向前滚动
-        if (size == 0){
+        if (size == 0) {
             tail = head;
         }
         items[head] = x;
@@ -47,7 +48,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         size++;
     }
 
-    public void resize(int x) {
+    private void resize(int x) {
         T[] a = (T[]) new Object[x];
         System.arraycopy(items, 0, a, 0, size);
         //重置状态
@@ -75,7 +76,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     //removeFirst
     public T removeFirst() {
-        if (isEmpty()){
+        if (isEmpty()) {
             return null;
         }
         if ((size < capacity / 4) && (size > 16)) {
@@ -90,7 +91,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     //removeLast
     public T removeLast() {
-        if (isEmpty()){
+        if (isEmpty()) {
             return null;
         }
         if ((size < capacity / 4) && (size > 16)) {
@@ -112,7 +113,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     }
 
     //iterator
-    public Iterator iterator() {
+    public Iterator <T> iterator() {
         return new DequeIterator();
     }
 
@@ -122,10 +123,12 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         public DequeIterator() {
             index = head;
         }
+
         @Override
         public boolean hasNext() {
             return index != (tail + 1) % capacity;
         }
+
         @Override
         public T next() {
             if (!hasNext()) {
@@ -145,10 +148,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return false;
         }
         ArrayDeque that = (ArrayDeque) o;
-        if (size != that.size
-                || head != that.head
-                || tail != that.tail
-                || capacity != that.capacity) {
+        if (size != that.size || head != that.head || tail != that.tail || capacity != that.capacity) {
             return false;
         } else {
             for (int i = 0; i < size; i++) {
@@ -159,5 +159,4 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return true;
         }
     }
-
 }
