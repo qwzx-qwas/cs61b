@@ -3,33 +3,28 @@ package deque;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-//使用循环队列，避免了在执行addfirst等操作时，需将原来数组整体移动，而是采用滚动模式crud
+// 使用循环队列，避免了在执行 addFirst 等操作时，需将原来数组整体移动，而是采用滚动模式
 public class ArrayDeque<T> implements Deque<T> {
     private T[] items;
-    //头指针
-    private int head;
-    //尾指针
-    private int tail;
+    private int head;      // 头指针
+    private int tail;      // 尾指针
     private int size;
-    //容量
-    private int capacity;
+    private int capacity;  // 容量
 
-    //初始化
     public ArrayDeque() {
         capacity = 8;
         items = (T[]) new Object[capacity];
         head = 0;
-        //当添加第一个指针时，tail向后移动到0
         tail = -1;
         size = 0;
     }
 
-    //addFirst
+    @Override
     public void addFirst(T x) {
         if (size == capacity) {
             resize(size * 2);
         }
-        head = (head - 1 + capacity) % capacity;//头指针向前滚动
+        head = (head - 1 + capacity) % capacity;
         if (size == 0) {
             tail = head;
         }
@@ -37,72 +32,71 @@ public class ArrayDeque<T> implements Deque<T> {
         size++;
     }
 
-    //addLast
+    @Override
     public void addLast(T x) {
         if (size == capacity) {
             resize(size * 2);
         }
-        //尾指针向后滚动
         tail = (tail + 1 + capacity) % capacity;
         items[tail] = x;
         size++;
     }
 
-    private void resize(int x) {
-        T[] a = (T[]) new Object[x];
+    private void resize(int newCapacity) {
+        T[] a = (T[]) new Object[newCapacity];
         for (int i = 0; i < size; i++) {
             a[i] = items[(head + i) % capacity];
         }
-        //重置状态
         items = a;
         head = 0;
         tail = size - 1;
-        capacity = x;
+        capacity = newCapacity;
     }
 
-    //size()
+    @Override
     public int size() {
         return size;
     }
 
-    //printDeque
+    @Override
     public void printDeque() {
         for (int i = 0; i < size; i++) {
             System.out.print(items[(head + i) % capacity] + " ");
         }
+        System.out.println();
     }
 
-    //removeFirst
+    @Override
     public T removeFirst() {
         if (isEmpty()) {
             return null;
         }
-        if ((size < capacity / 4) && (size > 16)) {
-            resize(size / 2);
+        if (size < capacity / 4 && capacity > 16) {
+            resize(capacity / 2);
         }
         T x = items[head];
         items[head] = null;
-        size = size - 1;
+        size--;
         head = (head + 1 + capacity) % capacity;
         return x;
     }
 
-    //removeLast
+    @Override
     public T removeLast() {
         if (isEmpty()) {
             return null;
         }
-        if ((size < capacity / 4) && (size > 16)) {
-            resize(size / 2);
+        if (size < capacity / 4 && capacity > 16) {
+            resize(capacity / 2);
         }
         T x = items[tail];
         items[tail] = null;
-        size = size - 1;
+        size--;
         tail = (tail - 1 + capacity) % capacity;
         return x;
     }
 
-    //get()
+    @Override
     public T get(int index) {
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException();
@@ -111,7 +105,7 @@ public class ArrayDeque<T> implements Deque<T> {
     }
 
     @Override
-    public Iterator <T> iterator() {
+    public Iterator<T> iterator() {
         return new DequeIterator();
     }
 
@@ -138,23 +132,30 @@ public class ArrayDeque<T> implements Deque<T> {
         }
     }
 
-    //equals
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ArrayDeque that = (ArrayDeque<T>) o;
-        if (size != that.size || head != that.head || tail != that.tail || capacity != that.capacity) {
-            return false;
-        } else {
-            for (int i = 0; i < size; i++) {
-                if (!items[(head + i) % capacity].equals(that.items[(that.head + i) % that.capacity])) {
-                    return false;
-                }
-            }
+        if (this == o) {
             return true;
         }
+        if (!(o instanceof Deque)) {
+            return false;
+        }
+
+        Deque<?> other = (Deque<?>) o;
+
+        if (this.size() != other.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < size(); i++) {
+            T thisItem = this.get(i);
+            Object otherItem = other.get(i);
+            if (!thisItem.equals(otherItem)) {
+                return false;
+            }
+        }
+        return true;
     }
+
 }
+
