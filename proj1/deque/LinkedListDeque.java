@@ -8,8 +8,8 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private class Node {
         //声明节点
         private T item;//节点的内容
-        private LinkedListDeque.Node next;//指向下一个
-        private LinkedListDeque.Node prev;//指向上一个
+        private Node next;//指向下一个
+        private Node prev;//指向上一个
 
         //初始化
         public Node(T item) {
@@ -64,7 +64,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     //打印
     public void printDeque() {
         Node curr = sentinelHead.next;
-        while (curr.item != null) {
+        while (curr!= sentinelTail) {
             System.out.print(curr.item + " ");
             curr = curr.next;
         }
@@ -107,7 +107,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         return (T) curr.item;
     }
 
-    public T getRecursive(int index) {
+    private T getRecursive(int index) {
         if (index < 0 || index >= size) {
             return null;
         }
@@ -156,8 +156,8 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         } else if (o == null) {
             return false;
         } else if (o.getClass() == this.getClass()
-                && ((LinkedListDeque) o).size == this.size) {
-            LinkedListDeque other = (LinkedListDeque) o;
+                && ((LinkedListDeque<T>) o).size == this.size) {
+            LinkedListDeque<T> other = (LinkedListDeque<T>) o;
             Node curr = this.sentinelHead.next;
             Node curro = other.sentinelHead.next;
             while (curr != sentinelTail) {

@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 //使用循环队列，避免了在执行addfirst等操作时，需将原来数组整体移动，而是采用滚动模式crud
-public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
+public class ArrayDeque<T> implements Deque<T> {
     private T[] items;
     //头指针
     private int head;
@@ -109,10 +109,10 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException();
         }
-        return items[head + index];
+        return items[(head + index) % capacity];
     }
 
-    //iterator
+    @Override
     public Iterator <T> iterator() {
         return new DequeIterator();
     }
@@ -134,7 +134,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            T value = items[head];
+            T value = items[index];
             index = (index + 1) % capacity;
             return value;
         }
@@ -152,7 +152,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return false;
         } else {
             for (int i = 0; i < size; i++) {
-                if (items[i] != that.items[i]) {
+                if (!items[(head + i) % capacity].equals(that.items[(that.head + i) % that.capacity])) {
                     return false;
                 }
             }
