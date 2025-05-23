@@ -104,7 +104,6 @@ public class ArrayDeque<T> implements Deque<T> {
         return items[(head + index) % capacity];
     }
 
-    @Override
     public Iterator<T> iterator() {
         return new DequeIterator();
     }
@@ -112,7 +111,7 @@ public class ArrayDeque<T> implements Deque<T> {
     private class DequeIterator implements Iterator<T> {
         private int index;
 
-        public DequeIterator() {
+        DequeIterator() {
             index = head;
         }
 
@@ -150,6 +149,11 @@ public class ArrayDeque<T> implements Deque<T> {
         for (int i = 0; i < size(); i++) {
             T thisItem = this.get(i);
             Object otherItem = other.get(i);
+            if (thisItem == null) {
+                if (otherItem != null) {
+                    return false;
+                }
+            }
             if (!thisItem.equals(otherItem)) {
                 return false;
             }
