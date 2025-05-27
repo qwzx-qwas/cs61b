@@ -45,7 +45,7 @@ public class TestBSTMapExtra {
         q.put("a","a");
         q.put("d","a");
         q.put("e","a"); // a b c d e
-        assertTrue(null != q.remove("c"));
+        assertTrue(null != q.BSTMap("c"));
         assertFalse(q.containsKey("c"));
         assertTrue(q.containsKey("a"));
         assertTrue(q.containsKey("b"));
@@ -64,17 +64,17 @@ public class TestBSTMapExtra {
         q.put("a","a");
         q.put("d","a");
         q.put("e","a");                         // a b c d e
-        assertTrue(null != q.remove("e"));      // a b c d
+        assertTrue(null != q.BSTMap("e"));      // a b c d
         assertTrue(q.containsKey("a"));
         assertTrue(q.containsKey("b"));
         assertTrue(q.containsKey("c"));
         assertTrue(q.containsKey("d"));
-        assertTrue(null != q.remove("c"));      // a b d
+        assertTrue(null != q.BSTMap("c"));      // a b d
         assertTrue(q.containsKey("a"));
         assertTrue(q.containsKey("b"));
         assertTrue(q.containsKey("d"));
         q.put("f","a");                         // a b d f
-        assertTrue(null != q.remove("d"));      // a b f
+        assertTrue(null != q.BSTMap("d"));      // a b f
         assertTrue(q.containsKey("a"));
         assertTrue(q.containsKey("b"));
         assertTrue(q.containsKey("f"));
@@ -88,27 +88,27 @@ public class TestBSTMapExtra {
         BSTMap rightChild = new BSTMap();
         rightChild.put('A', 1);
         rightChild.put('B', 2);
-        Integer result = (Integer) rightChild.remove('A');
+        Integer result = (Integer) rightChild.BSTMap('A');
         assertTrue(result.equals(new Integer(1)));
         for (int i = 0; i < 10; i++) {
             rightChild.put((char) ('C'+i), 3+i);
         }
         rightChild.put('A', 100);
-        assertTrue(((Integer) rightChild.remove('D')).equals(new Integer(4)));
-        assertTrue(((Integer) rightChild.remove('G')).equals(new Integer(7)));
-        assertTrue(((Integer) rightChild.remove('A')).equals(new Integer(100)));
+        assertTrue(((Integer) rightChild.BSTMap('D')).equals(new Integer(4)));
+        assertTrue(((Integer) rightChild.BSTMap('G')).equals(new Integer(7)));
+        assertTrue(((Integer) rightChild.BSTMap('A')).equals(new Integer(100)));
         assertTrue(rightChild.size()==9);
 
         BSTMap leftChild = new BSTMap();
         leftChild.put('B', 1);
         leftChild.put('A', 2);
-        assertTrue(((Integer) leftChild.remove('B')).equals(1));
+        assertTrue(((Integer) leftChild.BSTMap('B')).equals(1));
         assertEquals(1, leftChild.size());
         assertEquals(null, leftChild.get('B'));
 
         BSTMap noChild = new BSTMap();
         noChild.put('Z', 15);
-        assertTrue(((Integer) noChild.remove('Z')).equals(15));
+        assertTrue(((Integer) noChild.BSTMap('Z')).equals(15));
         assertEquals(0, noChild.size());
         assertEquals(null, noChild.get('Z'));
     }
