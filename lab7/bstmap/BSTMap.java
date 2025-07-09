@@ -37,32 +37,37 @@ public class BSTMap<K extends Comparable<K>,V> implements Map61B<K, V> {
         if(key == null){
             throw new IllegalArgumentException("key is null");
         }
-        return get(key) != null;
+        return findNode(root, key) != null;
+    }
+
+    private Node findNode(Node x , K key){
+        if(key == null){
+            throw new IllegalArgumentException("key is null");
+        }
+        if(x == null){
+            return null;
+        }
+        int cmp = key.compareTo(x.key);
+        if(cmp == 0){
+            return x;
+        } else if(cmp < 0){
+            return findNode(x.left, key);
+        } else {
+            return findNode(x.right, key);
+        }
     }
 
     //返回一个private方法去查找key
     @Override
     public V get(K key){
-        return get(root, key);
-    }
-    //实际的get方法
-    private V get(Node x, K key){
-        //key为空，报错
         if(key == null){
             throw new IllegalArgumentException("key is null");
         }
-        //节点为null,到头了返回无
+        Node x = findNode(root, key);
         if(x == null){
             return null;
-        }
-        //比较key和x.key
-        int cmp = key.compareTo(x.key);
-        if(cmp == 0){
-            return x.value;
-        } else if(cmp < 0){
-            return get(x.left, key);
         } else {
-            return get(x.right, key);
+            return x.value;
         }
     }
 
@@ -76,9 +81,7 @@ public class BSTMap<K extends Comparable<K>,V> implements Map61B<K, V> {
         if (key == null) {
             throw new IllegalArgumentException("key is null");
         }
-        if (value == null) {
-            throw new IllegalArgumentException("value is null");
-        }
+
          root = put(root, key, value);
     }
 
