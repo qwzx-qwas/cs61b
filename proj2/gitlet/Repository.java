@@ -192,4 +192,14 @@ public class Repository {
             }
         }
     }
+
+    public static void log (){
+        //先获取HEAD指向的commit,再顺着parentId往上走，直到null
+        String commitId = HEAD.getHeadCommitId();
+        while(commitId != null) {
+            Commit commit = Commit.readCommit(commitId);
+            Commit.printCommit(commit,commitId);
+            commitId = commit.getParent();
+        }
+    }
 }

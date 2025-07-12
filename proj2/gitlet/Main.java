@@ -1,6 +1,5 @@
 package gitlet;
 
-import java.io.File;
 import java.io.IOException;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
@@ -38,8 +37,12 @@ public class Main {
                 break;
             case "rm":
                 checkArgs(args,2);
-                String fileName = args[1];
-                Repository.rm(fileName);
+                String fileNamerm = args[1];
+                Repository.rm(fileNamerm);
+                break;
+            case "log":
+                checkArgs(args,1);
+                Repository.log();
                 break;
             default:
 

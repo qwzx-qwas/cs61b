@@ -2,6 +2,8 @@ package gitlet;
 
 // TODO: any imports you need here
 
+import org.checkerframework.checker.units.qual.C;
+
 import java.io.*;
 import java.util.Date;// TODO: You'll likely use this in this class
 import java.util.HashMap;
@@ -60,13 +62,24 @@ public class Commit implements Serializable {
     //使用getter进行封装
     public String getMessage() {return message;}
     public String getCommitDate() {return commitDate;}
-    public String getParent() {return parentId;}
+    public  String getParent() {return parentId;}
     public HashMap<String,String> getFileSnapshot() {return fileSnapshot;}
 
     //获取blobId
     public String getBlobId(String fileName) {
         return this.fileSnapshot.get(fileName);
     }
-
-
+    //通过commitId返回commit
+    public  static Commit readCommit(String commitId) {
+        File file = Utils.join(COMMITS_DIR, commitId);
+        return  Utils.readObject(file,Commit.class);
+    }
+    public static void printCommit(Commit commit,String commitId) {
+        System.out.println();
+        System.out.println("===");
+        System.out.println("commitId:"+commitId);
+        System.out.println("Date:"+commit.getCommitDate());
+        System.out.println(commit.getMessage());
+        System.out.println();
+    }
 }
