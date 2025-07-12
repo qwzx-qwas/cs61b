@@ -41,7 +41,7 @@ public class Commit implements Serializable {
     /** The message of this Commit.一条日志信息 */
     private String message;
     /** The timestamp when this Commit was created. 一个时间戳 */
-    private Date commitDate;
+    private String commitDate;
     /** 一个父引用 */
     private String parentId;//父提交的ID，即父文件名，用SHA-1哈希表示
     /** 一个从文件名到 blob 引用的映射（这取代了独立的“tree”对象）。
@@ -51,7 +51,7 @@ public class Commit implements Serializable {
 
     /* TODO: fill in the rest of this class. */
     /** 创建一个Commit 实例*/
-    public Commit(String message,Date commitDate,String parent,HashMap<String,String> file) {
+    public Commit(String message,String commitDate,String parent,HashMap<String,String> file) {
         this.message = message;
         this.parentId = parent;
         this.fileSnapshot = file;
@@ -59,7 +59,7 @@ public class Commit implements Serializable {
     }
     //使用getter进行封装
     public String getMessage() {return message;}
-    public Date getCommitDate() {return commitDate;}
+    public String getCommitDate() {return commitDate;}
     public String getParent() {return parentId;}
     public HashMap<String,String> getHashmap() {return fileSnapshot;}
 

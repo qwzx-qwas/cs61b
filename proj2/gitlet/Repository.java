@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
@@ -93,7 +94,7 @@ public class Repository {
             System.out.println("Error creating stage directory.");
             System.exit(0);
         }
-        Date initDate = new Date(0);
+        String initDate = " 00:00:00 UTC, Thursday, 1 January 1970";
         HashMap<String,String> initialSnapshot = new HashMap<>();
         Commit initial= new Commit("initial commit",initDate,null,initialSnapshot);
 
@@ -146,10 +147,36 @@ public class Repository {
 
     public static void commit(String message) {
         //检查message是否为空
-        if(message == null) {
+        if(message == null || message.equals( "")) {
             System.out.println("Commit message is null.");
             System.exit(0);
         }
-
+        //检查缓存区是否为空
+        Stage stage = Utils.readObject(STAGE_DIR,Stage.class);
+        if(stage.getAddedFiles().isEmpty() && stage.getRemovedFiles().isEmpty()) {
+            System.out.println("No changes added to the commit.");
+            System.exit(0);
+        }
+        //获取当前HEAD指向的commit作为父commit
+        Commit parentCommit= HEAD.getHeadCommit();
+        String parentId = HEAD.getHeadCommitId();
+        //获取旧的快照
+        HashMap<String,String> newSnapshot = new HashMap<>(parentCommit.getHashmap());
+        //更新快照
+        for(String fileName:stage.getAddedFiles().keySet()) {
+            String blobId = stage.getAddedFiles().get(fileName);
+            newSnapshot.put(fileName,blobId);
+        }
+        for(String fileName:stage.getRemovedFiles()) {
+            newSnapshot.remove(fileName);
+        }
+        //获取当前时间
+        String currentDate = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy Z").format(new Date());
+        //构造新的commit并保存到文件中
+        Commit currentCommit = new Commit(message,currentDate,parentId,newSnapshot);
+        Utils.writeContents(COMMITS_DIR,currentCommit);
+        //更新head以及清空stage
+        HEAD.updateHeadCommit(currentCommit);
+        Stage.clearStagingAera();
     }
 }

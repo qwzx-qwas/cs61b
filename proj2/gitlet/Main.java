@@ -32,7 +32,12 @@ public class Main {
                 break;
             // TODO: FILL THE REST IN
             case "commit":
-
+                checkArgs(args,2);
+                String message = args[1];
+                Repository.commit(message);
+                break;
+            case  "" :
+                break;
             default:
 
 

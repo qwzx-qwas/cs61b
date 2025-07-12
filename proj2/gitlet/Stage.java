@@ -11,6 +11,13 @@ public class Stage implements Serializable {
     private HashMap<String,String> addedFiles = new HashMap<>();
     //暂存待删除的文件的文件名的集合
     private HashSet<String> removedFiles = new HashSet<>();
+
+    public HashMap<String,String> getAddedFiles() {
+        return addedFiles;
+    }
+    public HashSet<String> getRemovedFiles() {
+        return removedFiles;
+    }
     //添加到缓存区
     public static void stageForAdd(String fileName , String blobId) {
        //先从硬盘里读取存储的Stage对象
@@ -43,7 +50,8 @@ public class Stage implements Serializable {
         Utils.writeObject(STAGE_DIR,stage);
     }
     //保存缓存区
-    public static void saveStagingAera() {
+    public static void clearStagingAera() {
         Utils.writeObject(STAGE_DIR,new Stage());
     }
+
 }
