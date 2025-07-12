@@ -32,17 +32,23 @@ public class Main {
             // TODO: FILL THE REST IN
             case "commit":
                 checkArgs(args,2);
-                String message = args[1];
-                Repository.commit(message);
+                Repository.commit(args[1]);
                 break;
             case "rm":
                 checkArgs(args,2);
-                String fileNamerm = args[1];
-                Repository.rm(fileNamerm);
+                Repository.rm(args[1]);
                 break;
             case "log":
                 checkArgs(args,1);
                 Repository.log();
+                break;
+            case "global-log" :
+                checkArgs(args,1);
+                Repository.globalLog();
+                break;
+            case "find":
+                checkArgs(args,2);
+                Repository.find(args[1]);
                 break;
             default:
 

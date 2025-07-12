@@ -81,5 +81,6 @@ public class Commit implements Serializable {
         System.out.println("Date:"+commit.getCommitDate());
         System.out.println(commit.getMessage());
         System.out.println();
+        System.out.println();
     }
 }

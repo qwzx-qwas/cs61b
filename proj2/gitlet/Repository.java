@@ -4,6 +4,7 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import static gitlet.Utils.*;
 
@@ -202,4 +203,29 @@ public class Repository {
             commitId = commit.getParent();
         }
     }
+
+    public static void globalLog() {
+        List<String> fileName = Utils.plainFilenamesIn(COMMITS_DIR);
+        for(String commitId:fileName) {
+            Commit commit = Commit.readCommit(commitId);
+            Commit.printCommit(commit,commitId);
+        }
+    }
+
+    public static void find(String message) {
+        List<String> fileName = Utils.plainFilenamesIn(COMMITS_DIR);
+        boolean found = false;
+        for(String commitId:fileName) {
+            Commit commit = Commit.readCommit(commitId);
+            if(commit.getMessage().equals(message)) {
+                System.out.println(commitId);
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println("Found no commit with that message.");
+        }
+    }
+
+    
 }
