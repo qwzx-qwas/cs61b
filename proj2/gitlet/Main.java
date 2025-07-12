@@ -26,8 +26,13 @@ public class Main {
                 break;
             case "add":
                 // TODO: handle the `add [filename]` command
+                checkArgs(args,2);
+                String fileName = args[1];
+                Repository.add(fileName);
                 break;
             // TODO: FILL THE REST IN
+            case "commit":
+
             default:
 
 

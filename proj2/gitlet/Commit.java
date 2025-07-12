@@ -6,10 +6,24 @@ import java.io.*;
 import java.util.Date;// TODO: You'll likely use this in this class
 import java.util.HashMap;
 
+import static gitlet.Repository.COMMITS_DIR;
+
 /** Represents a gitlet commit object.
  *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
+ *一个提交将仅仅由以下部分组成：
  *
+ * 一条日志信息。
+ *
+ * 一个时间戳。
+ *
+ * 一个从文件名到 blob 引用的映射（这取代了独立的“tree”对象）。
+ * （使用 HashMap<String, String> 这样的结构，来记录：每个文件名对应的 blob 的哈希值
+ * （也就是内容的唯一标识，即blob的名字）。
+ *
+ * 一个父引用（指向其直接祖先）。
+ *
+ * 以及，对于合并提交，一个第二个父引用。
  *  @author TODO
  */
 public class Commit implements Serializable {
@@ -49,9 +63,9 @@ public class Commit implements Serializable {
     public String getParent() {return parentId;}
     public HashMap<String,String> getHashmap() {return fileSnapshot;}
 
-    //获取该commit对象的哈希值
-    public String getSHA1() {
-
+    //获取blobId
+    public String getBlobId(String fileName) {
+        return this.fileSnapshot.get(fileName);
     }
 
 

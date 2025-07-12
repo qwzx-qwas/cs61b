@@ -34,7 +34,8 @@ class Utils {
     /* SHA-1 HASH VALUES. */
 
     /** Returns the SHA-1 hash of the concatenation of VALS, which may
-     *  be any mixture of byte arrays and Strings. */
+     *  be any mixture of byte arrays and Strings.可以传入多个字符串、byte数组，
+     *  它会拼在一起后生成一个40位的SHA-1哈希值 */
     static String sha1(Object... vals) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-1");
@@ -58,7 +59,7 @@ class Utils {
     }
 
     /** Returns the SHA-1 hash of the concatenation of the strings in
-     *  VALS. */
+     *  VALS. 同上，但是参数为list*/
     static String sha1(List<Object> vals) {
         return sha1(vals.toArray(new Object[vals.size()]));
     }
@@ -68,7 +69,7 @@ class Utils {
     /** Deletes FILE if it exists and is not a directory.  Returns true
      *  if FILE was deleted, and false otherwise.  Refuses to delete FILE
      *  and throws IllegalArgumentException unless the directory designated by
-     *  FILE also contains a directory named .gitlet. */
+     *  FILE also contains a directory named .gitlet.删除一个文件，但要检查你是否在 .gitlet/ 目录下！ */
     static boolean restrictedDelete(File file) {
         if (!(new File(file.getParentFile(), ".gitlet")).isDirectory()) {
             throw new IllegalArgumentException("not .gitlet working directory");
@@ -92,7 +93,7 @@ class Utils {
 
     /** Return the entire contents of FILE as a byte array.  FILE must
      *  be a normal file.  Throws IllegalArgumentException
-     *  in case of problems. */
+     *  in case of problems. 读取整个文件内容，变成“原始的字节数组”。(用来读blob）*/
     static byte[] readContents(File file) {
         if (!file.isFile()) {
             throw new IllegalArgumentException("must be a normal file");
@@ -106,7 +107,7 @@ class Utils {
 
     /** Return the entire contents of FILE as a String.  FILE must
      *  be a normal file.  Throws IllegalArgumentException
-     *  in case of problems. */
+     *  in case of problems.读取整个文件内容，并直接变成字符串。 */
     static String readContentsAsString(File file) {
         return new String(readContents(file), StandardCharsets.UTF_8);
     }
@@ -114,7 +115,7 @@ class Utils {
     /** Write the result of concatenating the bytes in CONTENTS to FILE,
      *  creating or overwriting it as needed.  Each object in CONTENTS may be
      *  either a String or a byte array.  Throws IllegalArgumentException
-     *  in case of problems. */
+     *  in case of problems. 把一堆字符串或字节写进一个文件里。*/
     static void writeContents(File file, Object... contents) {
         try {
             if (file.isDirectory()) {
@@ -137,7 +138,8 @@ class Utils {
     }
 
     /** Return an object of type T read from FILE, casting it to EXPECTEDCLASS.
-     *  Throws IllegalArgumentException in case of problems. */
+     *  Throws IllegalArgumentException in case of problems.
+     *  从文件中读取一个 Java 对象。*/
     static <T extends Serializable> T readObject(File file,
                                                  Class<T> expectedClass) {
         try {
@@ -152,7 +154,7 @@ class Utils {
         }
     }
 
-    /** Write OBJ to FILE. */
+    /** Write OBJ to FILE. 把一个对象保存到文件中*/
     static void writeObject(File file, Serializable obj) {
         writeContents(file, serialize(obj));
     }
@@ -170,7 +172,7 @@ class Utils {
 
     /** Returns a list of the names of all plain files in the directory DIR, in
      *  lexicographic order as Java Strings.  Returns null if DIR does
-     *  not denote a directory. */
+     *  not denote a directory. 列出一个文件夹里所有的普通文件名字（不是文件夹），而且是按字母顺序排序好的列表*/
     static List<String> plainFilenamesIn(File dir) {
         String[] files = dir.list(PLAIN_FILES);
         if (files == null) {
@@ -192,7 +194,7 @@ class Utils {
 
     /** Return the concatentation of FIRST and OTHERS into a File designator,
      *  analogous to the {@link java.nio.file.Paths.#get(String, String[])}
-     *  method. */
+     *  method.拼接路径 ，并返回拼接对象file的*/
     static File join(String first, String... others) {
         return Paths.get(first, others).toFile();
     }
@@ -207,7 +209,9 @@ class Utils {
 
     /* SERIALIZATION UTILITIES */
 
-    /** Returns a byte array containing the serialized contents of OBJ. */
+    /** Returns a byte array containing the serialized contents of OBJ.把 Java 对象转成 byte[]。
+     这个 byte[] 可以写入文件保存，方便以后还原。
+     *  */
     static byte[] serialize(Serializable obj) {
         try {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -225,13 +229,13 @@ class Utils {
     /* MESSAGES AND ERROR REPORTING */
 
     /** Return a GitletException whose message is composed from MSG and ARGS as
-     *  for the String.format method. */
+     *  for the String.format method.： */
     static GitletException error(String msg, Object... args) {
         return new GitletException(String.format(msg, args));
     }
 
     /** Print a message composed from MSG and ARGS as for the String.format
-     *  method, followed by a newline. */
+     *  method, followed by a newline.像 System.out.printf() 一样输出格式化的信息。 */
     static void message(String msg, Object... args) {
         System.out.printf(msg, args);
         System.out.println();
