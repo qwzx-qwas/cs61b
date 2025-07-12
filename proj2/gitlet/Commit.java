@@ -61,7 +61,7 @@ public class Commit implements Serializable {
     public String getMessage() {return message;}
     public String getCommitDate() {return commitDate;}
     public String getParent() {return parentId;}
-    public HashMap<String,String> getHashmap() {return fileSnapshot;}
+    public HashMap<String,String> getFileSnapshot() {return fileSnapshot;}
 
     //获取blobId
     public String getBlobId(String fileName) {

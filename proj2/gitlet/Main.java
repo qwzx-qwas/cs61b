@@ -36,7 +36,10 @@ public class Main {
                 String message = args[1];
                 Repository.commit(message);
                 break;
-            case  "" :
+            case "rm":
+                checkArgs(args,2);
+                String fileName = args[1];
+                Repository.rm(fileName);
                 break;
             default:
 

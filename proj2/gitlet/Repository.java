@@ -4,7 +4,6 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.concurrent.Callable;
 
 import static gitlet.Utils.*;
 
@@ -161,7 +160,7 @@ public class Repository {
         Commit parentCommit= HEAD.getHeadCommit();
         String parentId = HEAD.getHeadCommitId();
         //获取旧的快照
-        HashMap<String,String> newSnapshot = new HashMap<>(parentCommit.getHashmap());
+        HashMap<String,String> newSnapshot = new HashMap<>(parentCommit.getFileSnapshot());
         //更新快照
         for(String fileName:stage.getAddedFiles().keySet()) {
             String blobId = stage.getAddedFiles().get(fileName);
@@ -178,5 +177,19 @@ public class Repository {
         //更新head以及清空stage
         HEAD.updateHeadCommit(currentCommit);
         Stage.clearStagingAera();
+    }
+
+    public static void rm(String fileName) {
+        Commit currentCommit = HEAD.getHeadCommit();
+        Stage stage = Utils.readObject(STAGE_DIR,Stage.class);
+        Stage.stageForRemove(fileName);
+        if(currentCommit.getFileSnapshot().containsKey(fileName)) {
+            stage.getRemovedFiles().add(fileName);
+            //看工作路径上是否存在该文件，有就删去
+            File fileINCWD = new File(fileName);
+            if(fileINCWD.exists()) {
+                fileINCWD.delete();
+            }
+        }
     }
 }
