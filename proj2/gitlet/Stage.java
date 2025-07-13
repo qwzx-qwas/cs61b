@@ -7,7 +7,7 @@ import java.util.HashSet;
 import static gitlet.Repository.STAGE_DIR;
 
 public class Stage implements Serializable {
-    //文件名 -> blobId的映射（暂存待添加的文件
+    //文件名 -> blobId的映射（暂存待添加的文件），文件名是 key，blobId 是 value
     private HashMap<String,String> addedFiles = new HashMap<>();
     //暂存待删除的文件的文件名的集合
     private HashSet<String> removedFiles = new HashSet<>();

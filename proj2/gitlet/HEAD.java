@@ -24,4 +24,8 @@ public class HEAD {
         String commitId = Utils.readContentsAsString(branchFile).trim();
         return commitId;
     }
+    public static String getCurrentBranchName(){
+        String refsPath = Utils.readContentsAsString(HEAD_DIR).trim();
+        return refsPath.substring(refsPath.lastIndexOf("/") + 1);
+    }
 }

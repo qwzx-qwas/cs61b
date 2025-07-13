@@ -2,9 +2,7 @@ package gitlet;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static gitlet.Utils.*;
 
@@ -47,7 +45,7 @@ public class Repository {
      *
      *
      * */
-    /** The current working directory. */
+    /** The current working directory. 工作目录*/
     public static final File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. 创建一个隐藏的 .gitlet/ 文件夹*/
     public static final File GITLET_DIR = join(CWD, ".gitlet");
@@ -109,8 +107,7 @@ public class Repository {
          ObjectOutputStream oos = new ObjectOutputStream(bos);
          //oos写入至文档initialSnapshot
          oos.writeObject(initialSnapshot);
-         oos.close();//打开文件准备写字
-
+         oos.close();
         //创建HEAD文件,设置 HEAD 内容为 "refs/heads/master"
         Utils.writeContents(HEAD_DIR, "refs/heads/master");
         /** 创建master分支，指向initialCommit*/
@@ -227,5 +224,85 @@ public class Repository {
         }
     }
 
-    
-}
+    public static void status() {
+        //列出所有分支
+        List<String> branchName = Utils.plainFilenamesIn(HEADS_DIR);
+        Collections.sort(branchName);
+        System.out.println("=== Branches ===");
+        for(String branch:branchName) {
+            //当前活跃的分支前加*
+            String currentBranch = HEAD.getCurrentBranchName();
+            if(branch.equals(currentBranch)) {
+                System.out.println("*"+branch);
+            }
+        }
+        for(String branch:branchName) {
+            if(!branch.equals(HEAD.getHeadCommitId())) {
+                System.out.println(branch);
+            }
+        }
+        //列出所有已暂存以备添加的文件
+        Stage stage = Utils.readObject(STAGE_DIR,Stage.class);
+        List<String> addedFiles =new ArrayList<>(stage.getAddedFiles().keySet()) ;
+        System.out.println();
+
+        System.out.println("=== Staged Files ===");
+        Collections.sort(addedFiles);
+        for(String addedFile:addedFiles) {
+            System.out.println(addedFile);
+        }
+        //列出所有已暂存以备移除的文件
+        System.out.println();
+
+        System.out.println("=== Removed Files ===");
+        List<String> removedFilesList = new ArrayList<>(stage.getRemovedFiles());
+        for(String removedFile:removedFilesList) {
+            System.out.println(removedFile);
+        }
+        System.out.println();
+
+        System.out.println("=== Modifications Not Staged For Commit ===");
+        //1.已 add 到缓存区，然后又修改，但没重新 add
+        //找到当前工作目录下与Stage中存在的文件名的文件名
+        for(String file :stage.getAddedFiles().keySet()) {
+            File fileINCWD = new File(CWD,file);
+            //如果工作目录下的文件已经被删除，而缓存区中仍有 or 如果工作目录下的文件已经被删除,而原先commit仍有
+            if(!fileINCWD.exists()) {
+                if(stage.getAddedFiles().containsKey(file) ||HEAD.getHeadCommit().getBlobId(file) != null) {
+                    System.out.println(file + "(deleted)");
+                }
+            } else {
+                String currentId = Utils.sha1(readContents(fileINCWD));
+                String IdInStage = stage.getAddedFiles().get(file);
+                if(!currentId.equals(IdInStage)) {
+                    System.out.println(file + "(modified)");
+                }
+            }
+        }
+        System.out.println();
+
+        System.out.println("=== Untracked Files ===");
+        List<String> result = new ArrayList<>();
+        //获取CWD下所有文件名字
+        List<String> CWDFileNameList = Utils.plainFilenamesIn(CWD);
+        Collections.sort(CWDFileNameList);
+        Commit head = HEAD.getHeadCommit();
+        Map<String, String> tracked = head.getFileSnapshot();
+        for(String CWDFileName:CWDFileNameList) {
+            File file = new File(CWD,CWDFileName);
+            if(!file.exists()) { continue; }
+            //既未暂存以备添加也未被跟踪的文件
+            boolean untracked =!tracked.containsKey(CWDFileName)&& !stage.getAddedFiles().containsKey(CWDFileName);
+           //还有已被暂存以备移除，但又被创建
+            if(untracked ||stage.getRemovedFiles().contains(CWDFileName)) {
+               result.add(CWDFileName);
+           }
+        }
+            for(String file:result) {
+                System.out.println(file);
+            }
+            System.out.println();
+        }
+
+    }
+

@@ -50,6 +50,12 @@ public class Main {
                 checkArgs(args,2);
                 Repository.find(args[1]);
                 break;
+            case "status":
+                checkArgs(args,1);
+                Repository.status();
+                break;
+            case "checkout":
+                
             default:
 
 
