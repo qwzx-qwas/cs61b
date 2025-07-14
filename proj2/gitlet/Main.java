@@ -77,6 +77,9 @@ public class Main {
                 checkArgs(args,2);
                 Repository.rmBranch(args[1]);
                 break;
+            case "reset":
+                checkArgs(args,2);
+                Repository.reset(args[1]);
             default:
 
 

@@ -320,10 +320,17 @@ public class Repository {
                 System.out.println("No need to checkout the current branch");
                 System.exit(0);
             }
-            //检查是否工作目录中的文件在当前分支中是未跟踪的，并且会被检出操作覆盖
-            //目标commit
             String distCommitId = Utils.readContentsAsString(distBranch).trim();
             Commit distCommit = Commit.readCommit(distCommitId);
+            //检查加覆盖CWD中的文件
+            Repository.checkoutCommit(distCommit);
+            //更新HEAD
+            HEAD.updateHeadCommit(distCommitId);
+        }
+
+        public static void checkoutCommit(Commit distCommit) {
+            //检查是否工作目录中的文件在当前分支中是未跟踪的，并且会被检出操作覆盖
+            //目标commit
             HashMap<String,String> distSnapshot = distCommit.getFileSnapshot();
             //当前commit
             String currentCommitId = getHeadCommitId();
@@ -339,6 +346,15 @@ public class Repository {
                     System.exit(0);
                 }
             }
+            //删除当前commit中有但对应分支没有的
+            for (String fileName : currentSnapshot.keySet()) {
+                if (!distSnapshot.containsKey(fileName)) {
+                    File file = Utils.join(CWD, fileName);
+                    if (file.exists()) {
+                        file.delete();
+                    }
+                }
+            }
             //遍历目标branch的所有文件，把它放到CWD中
             for(Map.Entry<String,String> entry:distSnapshot.entrySet()) {
                 String distFileName = entry.getKey();
@@ -348,11 +364,8 @@ public class Repository {
                 File newFile = Utils.join(CWD,distFileName);
                 Utils.writeContents(newFile,blobContents);
             }
-
             //清空缓存区
             Stage.clearStagingAera();
-            //更新HEAD
-            HEAD.updateHeadCommit(distCommitId);
         }
 
         public static void checkoutFileFromHEAD(String fileName) {
@@ -405,6 +418,12 @@ public class Repository {
                 System.exit(0);
             }
             branchFile.delete();
+        }
+
+        public static void reset(String commitId) {
+            Commit commit = Commit.readCommit(commitId);
+            checkoutCommit(commit);
+            HEAD.updateHeadCommit(commitId);
         }
     }
 
