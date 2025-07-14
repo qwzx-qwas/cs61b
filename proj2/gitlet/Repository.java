@@ -174,7 +174,8 @@ public class Repository {
         Commit currentCommit = new Commit(message,currentDate,parentId,newSnapshot);
         Utils.writeContents(COMMITS_DIR,currentCommit);
         //更新head以及清空stage
-        HEAD.updateHeadCommit(currentCommit);
+        String currentCommitId = Utils.sha1(currentCommit);
+        HEAD.updateHeadCommit(currentCommitId);
         Stage.clearStagingAera();
     }
 
@@ -306,7 +307,52 @@ public class Repository {
         }
 
         public static void checkoutBranch(String branchName) {
-            //将指定文件从
+            //将指定文件从指定分支中覆盖到CWD，把HEAD指向当前分支，清空缓存区
+            File distBranch = Utils.join(HEADS_DIR,branchName);
+            //是否存在该branch
+            if(!distBranch.exists()) {
+                System.out.println(" No such branch exists.");
+                System.exit(0);
+            }
+            //检查是否为当前分支
+            String currentBranch = HEAD.getCurrentBranchName();
+            if(currentBranch.equals(branchName)) {
+                System.out.println("No need to checkout the current branch");
+                System.exit(0);
+            }
+            //检查是否工作目录中的文件在当前分支中是未跟踪的，并且会被检出操作覆盖
+            //目标commit
+            String distCommitId = Utils.readContentsAsString(distBranch).trim();
+            Commit distCommit = Commit.readCommit(distCommitId);
+            HashMap<String,String> distSnapshot = distCommit.getFileSnapshot();
+            //当前commit
+            String currentCommitId = getHeadCommitId();
+            Commit currentCommit = Commit.readCommit(currentCommitId);
+            HashMap<String,String> currentSnapshot = currentCommit.getFileSnapshot();
+            //检查是否有untracked文件被覆盖
+            //列出当前CWD下的所有文件名
+            List<String> cwdFileNameList = Utils.plainFilenamesIn(CWD);
+            for(String cwdFileName:cwdFileNameList) {
+                //当前没有，而目标分支有
+                if(distSnapshot.containsKey(cwdFileName) && !currentSnapshot.containsKey(cwdFileName)) {
+                    System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                    System.exit(0);
+                }
+            }
+            //遍历目标branch的所有文件，把它放到CWD中
+            for(Map.Entry<String,String> entry:distSnapshot.entrySet()) {
+                String distFileName = entry.getKey();
+                String blobId = entry.getValue();
+                File blobFile = Utils.join(BLOBS_DIR,blobId);
+                byte[] blobContents = Utils.readContents(blobFile);
+                File newFile = Utils.join(CWD,distFileName);
+                Utils.writeContents(newFile,blobContents);
+            }
+
+            //清空缓存区
+            Stage.clearStagingAera();
+            //更新HEAD
+            HEAD.updateHeadCommit(distCommitId);
         }
 
         public static void checkoutFileFromHEAD(String fileName) {
