@@ -83,4 +83,12 @@ public class Commit implements Serializable {
         System.out.println();
         System.out.println();
     }
+    public static String resolveFullCommitId(String shortId) {
+        for (String fileName : Utils.plainFilenamesIn(COMMITS_DIR)) {
+            if (fileName.startsWith(shortId)) {
+                return fileName;
+            }
+        }
+        return null;
+    }
 }

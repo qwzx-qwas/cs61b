@@ -16,7 +16,12 @@ public class HEAD {
     }
     //将commit序列化再转为SHA1，最后保存到HEAD文件
     public static void updateHeadCommit(Commit commit) {
-        Utils.writeContents(HEAD_DIR, Utils.sha1(Utils.serialize(commit)));
+        //获取当前HEAD指向的分支的路径
+        String refsPath = Utils.readContentsAsString(HEAD_DIR).trim();
+        File branchFile = Utils.join(GITLET_DIR,refsPath);
+        //把新的commit的Id写入该路径
+        String commitId = Utils.sha1(Utils.serialize(commit));
+        Utils.writeContents(branchFile,commitId);
     }
     public static String getHeadCommitId (){
         String refsPath = Utils.readContentsAsString(HEAD_DIR).trim();

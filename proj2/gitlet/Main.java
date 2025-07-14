@@ -55,7 +55,28 @@ public class Main {
                 Repository.status();
                 break;
             case "checkout":
-                
+                //切换到另一个分支,git checkout [分支名]
+                if(args.length==2){
+                    Repository.checkoutBranch(args[1]);
+                } else if (args.length==3 && args[1].equals("--")) {
+                    //回到HEAD指向的状态,git checkout [文件名]
+                    Repository.checkoutFileFromHEAD(args[2]);
+                } else if (args.length == 4 && args[2].equals("--")) {
+                    //回到文件某个状态，git checkout [commit id] -- [文件名]
+                    Repository.checkoutFromCommit(args[1],args[3]);
+                } else {
+                    System.out.println("Incorrect operand.");
+                    System.exit(0);
+                }
+                break;
+            case "branch":
+                checkArgs(args,2);
+                Repository.branch(args[1]);
+                break;
+            case "rm-branch":
+                checkArgs(args,2);
+                Repository.rmBranch(args[1]);
+                break;
             default:
 
 
@@ -65,7 +86,7 @@ public class Main {
     //检查输入是否为空
     private static void checkMain(String[] args) {
         if (args.length == 0) {
-            System.out.println("Please enter a command");
+            System.out.println("Please enter a command.");
             System.exit(0);
         }
     }

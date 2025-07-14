@@ -4,6 +4,7 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static gitlet.HEAD.getHeadCommitId;
 import static gitlet.Utils.*;
 
 // TODO: any imports you need here
@@ -156,7 +157,7 @@ public class Repository {
         }
         //获取当前HEAD指向的commit作为父commit
         Commit parentCommit= HEAD.getHeadCommit();
-        String parentId = HEAD.getHeadCommitId();
+        String parentId = getHeadCommitId();
         //获取旧的快照
         HashMap<String,String> newSnapshot = new HashMap<>(parentCommit.getFileSnapshot());
         //更新快照
@@ -193,7 +194,7 @@ public class Repository {
 
     public static void log (){
         //先获取HEAD指向的commit,再顺着parentId往上走，直到null
-        String commitId = HEAD.getHeadCommitId();
+        String commitId = getHeadCommitId();
         while(commitId != null) {
             Commit commit = Commit.readCommit(commitId);
             Commit.printCommit(commit,commitId);
@@ -237,7 +238,7 @@ public class Repository {
             }
         }
         for(String branch:branchName) {
-            if(!branch.equals(HEAD.getHeadCommitId())) {
+            if(!branch.equals(getHeadCommitId())) {
                 System.out.println(branch);
             }
         }
@@ -304,5 +305,60 @@ public class Repository {
             System.out.println();
         }
 
+        public static void checkoutBranch(String branchName) {
+            //将指定文件从
+        }
+
+        public static void checkoutFileFromHEAD(String fileName) {
+            //将指定文件从HEAD指向的版本的commit文件中取出，加入到工作目录中
+            String commitId = getHeadCommitId();
+            checkoutFromCommit(commitId,fileName);
+        }
+
+        public static void checkoutFromCommit(String commitId, String fileName) {
+            String shortCommitId = Commit.resolveFullCommitId(commitId);
+            Commit distCommit = Commit.readCommit(shortCommitId);
+            if(distCommit == null) {
+                System.out.println( "No commit with that id exists.");
+                System.exit(0);
+            }
+            HashMap<String,String> distMap = distCommit.getFileSnapshot();
+            //如果当前文件不存在于当前的commit中
+            if(!distMap.containsKey(fileName)) {
+                System.out.println( "File does not exist in that commit.");
+                System.exit(0);
+            }
+            //从commit中取出blobId（用对应的文件名）,用blobId去找blob文件，再写入
+            //如果工作目录已存在该文件，就覆盖他（writeContents方法已经包含）
+            String blobId = distMap.get(fileName);
+            File blobFile = Utils.join(BLOBS_DIR,blobId);
+            byte[] blobContents = Utils.readContents(blobFile);
+            File newFile = Utils.join(CWD,fileName);
+            Utils.writeContents(newFile,blobContents);
+        }
+
+        public static void branch(String branchName) {
+            File newBranch = Utils.join(HEADS_DIR,branchName);
+            if(newBranch.exists()) {
+                System.out.println("A branch with that name already exists.");
+                System.exit(0);
+            }
+            String headCommitId = getHeadCommitId();
+            Utils.writeContents(newBranch,headCommitId);
+        }
+
+        public static void rmBranch(String branchName) {
+            File branchFile = Utils.join(HEADS_DIR,branchName);
+            if(!branchFile.exists()) {
+                System.out.println("A branch with that name does not exist.");
+                System.exit(0);
+            }
+            String currentBranchName = HEAD.getCurrentBranchName();
+            if(branchName.equals(currentBranchName)) {
+                System.out.println("Cannot remove the current branch.");
+                System.exit(0);
+            }
+            branchFile.delete();
+        }
     }
 
