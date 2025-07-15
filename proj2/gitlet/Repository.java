@@ -322,7 +322,7 @@ public class Repository {
             }
             String distCommitId = Utils.readContentsAsString(distBranch).trim();
             Commit distCommit = Commit.readCommit(distCommitId);
-            //检查加覆盖CWD中的文件
+            //检查加覆盖CWD中的文件加清除缓存
             Repository.checkoutCommit(distCommit);
             //更新HEAD
             HEAD.updateHeadCommit(distCommitId);
@@ -419,11 +419,19 @@ public class Repository {
             }
             branchFile.delete();
         }
-
+        //跟checkout差不多，不过输入是commitId
         public static void reset(String commitId) {
             Commit commit = Commit.readCommit(commitId);
             checkoutCommit(commit);
             HEAD.updateHeadCommit(commitId);
+        }
+
+        public static void merge(String branchName) {
+            Stage stage = Utils.readObject(STAGE_DIR,Stage.class);
+            if(!stage.getAddedFiles().isEmpty() || !stage.getRemovedFiles().isEmpty()) {
+                System.out.println("You have uncommitted changes.");
+                System.exit(0);
+            }
         }
     }
 

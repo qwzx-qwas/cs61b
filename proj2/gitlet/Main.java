@@ -80,6 +80,11 @@ public class Main {
             case "reset":
                 checkArgs(args,2);
                 Repository.reset(args[1]);
+                break;
+            case "merge":
+                checkArgs(args,2);
+                Repository.merge(args[1]);
+                break;
             default:
 
 
