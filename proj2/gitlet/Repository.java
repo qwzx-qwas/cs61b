@@ -564,11 +564,13 @@ public class Repository {
                 mergedSnapshot.put(file, blobId);
             }
             //合并提交
-            String mergeMessage = "Merged" + branchName + "into" + HEAD.getCurrentBranchName() + ".";
+            String mergeMessage = "Merged " + branchName + " into " + HEAD.getCurrentBranchName() + ".";
             List<String> parents = List.of(currentCommitId, distCommitId);
             String currentDate = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy Z").format(new Date());
             Commit mergeCommit = new Commit(mergeMessage,currentDate,mergedSnapshot,parents);
-            Utils.writeContents(COMMITS_DIR,mergeCommit);
+            String mergeCommitId = Utils.sha1(Utils.serialize(mergeCommit));
+            Utils.writeContents(COMMITS_DIR,mergeCommitId);
+            HEAD.updateHeadCommit(mergeCommitId);
             if(hasConflicts) {
                 System.out.println("Encountered a merge conflict." );
             }
