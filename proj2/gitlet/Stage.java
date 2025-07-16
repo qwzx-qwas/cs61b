@@ -49,7 +49,7 @@ public class Stage implements Serializable {
         stage.addedFiles.remove(filename);
         Utils.writeObject(STAGE_DIR,stage);
     }
-    //保存缓存区
+    //清空缓存区
     public static void clearStagingAera() {
         Utils.writeObject(STAGE_DIR,new Stage());
     }

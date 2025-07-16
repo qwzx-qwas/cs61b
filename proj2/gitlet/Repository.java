@@ -95,7 +95,7 @@ public class Repository {
         }
         String initDate = " 00:00:00 UTC, Thursday, 1 January 1970";
         HashMap<String,String> initialSnapshot = new HashMap<>();
-        Commit initial= new Commit("initial commit",initDate,null,initialSnapshot);
+        Commit initial= new Commit("initial commit",initDate,initialSnapshot,null);
 
         //获取初始提交的哈希值,并保存初始提交为文件
         String initialCommitId = Utils.sha1(initial);
@@ -156,8 +156,8 @@ public class Repository {
             System.exit(0);
         }
         //获取当前HEAD指向的commit作为父commit
-        Commit parentCommit= HEAD.getHeadCommit();
-        String parentId = getHeadCommitId();
+        Commit parentCommit = HEAD.getHeadCommit();
+        List<String> parents = List.of(HEAD.getHeadCommitId());
         //获取旧的快照
         HashMap<String,String> newSnapshot = new HashMap<>(parentCommit.getFileSnapshot());
         //更新快照
@@ -171,7 +171,7 @@ public class Repository {
         //获取当前时间
         String currentDate = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy Z").format(new Date());
         //构造新的commit并保存到文件中
-        Commit currentCommit = new Commit(message,currentDate,parentId,newSnapshot);
+        Commit currentCommit = new Commit(message,currentDate,newSnapshot,parents);
         Utils.writeContents(COMMITS_DIR,currentCommit);
         //更新head以及清空stage
         String currentCommitId = Utils.sha1(currentCommit);
@@ -427,11 +427,168 @@ public class Repository {
         }
 
         public static void merge(String branchName) {
+            HashMap<String, String> mergedSnapshot = new HashMap<>();
             Stage stage = Utils.readObject(STAGE_DIR,Stage.class);
+            // 如果存在任何暂存的添加或删除
             if(!stage.getAddedFiles().isEmpty() || !stage.getRemovedFiles().isEmpty()) {
                 System.out.println("You have uncommitted changes.");
                 System.exit(0);
             }
+            //如果指定的分支名称不存在，
+            File branchFile = Utils.join(HEADS_DIR,branchName);
+            if(!branchFile.exists()) {
+                System.out.println("A branch with that name does not exist.");
+                System.exit(0);
+            }
+            //尝试将分支与其自身合并会显示错误消息“Cannot merge a branch with itself.”（无法将分支与自身合并）。
+            if(branchName.equals(HEAD.getCurrentBranchName())) {
+                System.out.println("Cannot merge a branch with itself.");
+                System.exit(0);
+            }
+            //检查是否工作目录中的文件在当前分支中是未跟踪的，并且会被检出操作覆盖
+            //目标commit
+            String distCommitId = Utils.readContentsAsString(branchFile).trim();
+            Commit distCommit = Commit.readCommit(distCommitId);
+            HashMap<String,String> distSnapshot = distCommit.getFileSnapshot();
+            //当前commit
+            String currentCommitId = getHeadCommitId();
+            Commit currentCommit = Commit.readCommit(currentCommitId);
+            HashMap<String,String> currentSnapshot = currentCommit.getFileSnapshot();
+            //检查是否有untracked文件被覆盖
+            //列出当前CWD下的所有文件名
+            List<String> cwdFileNameList = Utils.plainFilenamesIn(CWD);
+            for(String cwdFileName:cwdFileNameList) {
+                //当前没有，而目标分支有
+                if(distSnapshot.containsKey(cwdFileName) && !currentSnapshot.containsKey(cwdFileName)) {
+                    System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                    System.exit(0);
+                }
+            }
+            String split = getSplitPoint(currentCommitId,distCommitId);
+            //如果splitPoint（最新共同祖先）与给定分支的头部是同一个提交
+            if(split.equals(distCommitId)) {
+                System.out.println("Given branch is an ancestor of the current branch.");
+                System.exit(0);
+            }
+            //如果splitPoint与当前分支的头部是同一个提交，Gitlet 会执行“快进”合并
+            if(split.equals(currentCommitId)) {
+                System.out.println("Current branch fast-forwarded.");
+                HEAD.updateHeadCommit(distCommitId);
+            }
+            Commit splitedCommit = Commit.readCommit(split);
+            Map<String,String> splitSnapshot = splitedCommit.getFileSnapshot();
+            //把三代文件放到一起
+            Set<String> allFiles = new HashSet<>();
+            allFiles.addAll(currentSnapshot.keySet());
+            allFiles.addAll(distSnapshot.keySet());
+            allFiles.addAll(splitSnapshot.keySet());
+            //遍历所有文件，看看同样的文件，三代是否相同
+            for(String file:allFiles) {
+                String currentHash = currentSnapshot.get(file);
+                String distHash = distSnapshot.get(file);
+                String splitHash = splitSnapshot.get(file);
+                //判断是否存在该文件
+                boolean inCurr = (currentHash != null);
+                boolean inDist = (distHash != null);
+                boolean inSplit = (splitHash != null);
+                //只在“给定分支”里改动了文件,split和current一样，和dist不一样
+                if(splitHash.equals(currentHash) && !splitHash.equals(distHash)) {
+                    checkoutFromCommit(distCommitId,file);
+                    Stage.stageForAdd(file,distHash);
+                    continue;
+                }
+                //仅在curr分支中修改
+                if(splitHash.equals(distHash) && !splitHash.equals(currentHash)) {
+                    continue;
+                }
+                //curr和dist都修改或删除
+                if(currentHash.equals(distHash)) {
+                    continue;
+                }
+                //只在当前分支中新增
+                if(inCurr && !inSplit && !inDist) {
+                    continue;
+                }
+                // 仅给定分支新增
+                if(inDist && !inSplit && !inCurr) {
+                    checkoutFromCommit(distCommitId,file);
+                    Stage.stageForAdd(file,splitHash);
+                    continue;
+                }
+                //当前未修改，给定删除（要删除）
+                if(inSplit && splitHash.equals(currentHash) && !inDist) {
+                    //删除 + 取消跟踪（即移除暂存记录）
+                    File newFile = Utils.join(CWD,file);
+                    newFile.delete();
+                    continue;
+                }
+                //给定未修改，当前删除
+                if(distHash.equals(splitHash) && !inCurr ) {
+                    continue;
+                }
+                //其余为冲突
+                String currentContent;
+                String distContent;
+                if (inCurr) {
+                    File currentFile = Utils.join(BLOBS_DIR,currentHash);
+                    currentContent = Utils.readContentsAsString(currentFile);
+                } else {
+                    currentContent = "";
+                }
+                if (inDist) {
+                    File distFile = Utils.join(BLOBS_DIR,distHash);
+                    distContent = Utils.readContentsAsString(distFile);
+                } else {
+                    distContent = "";
+                }
+                String conflictContent = "<<<<<<< HEAD\n" + currentContent +
+                        "=======\n" + distContent +
+                        ">>>>>>>\n";
+                //把合并后的冲突内容写进工作目录的对应文件。
+                //相当于创建了一个“带冲突提示”的版本，让用户知道该手动解决
+                File conflictFile = Utils.join(CWD,file);
+                Utils.writeContents(conflictFile,conflictContent);
+                //加入到暂存区
+                String blobId = Utils.sha1(conflictContent);
+                Stage.stageForAdd(file,blobId);
+            }
+            //合并提交
+            String mergeMessage = "Merged" + branchName + "into" + HEAD.getCurrentBranchName() + ".";
+            List<String> parents = List.of(currentCommitId, distCommitId);
+            String currentDate = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy Z").format(new Date());
+            Commit mergeCommit = new Commit(mergeMessage,currentDate,)
+        }
+
+        public static String getSplitPoint(String CommitId1,String CommitId2) {
+        //用集合记录commitId1家谱中所有祖先的ID
+            Set<String> ancestor1 = new HashSet<>();
+        //BFS实现遍历，记录全部祖先
+            Queue<String> queue1 = new LinkedList<>();
+            queue1.add(CommitId1);
+            while(!queue1.isEmpty()) {
+                //获取第一个，并删除
+                String id = queue1.poll();
+                Commit c = Commit.readCommit(id);
+                List<String> parents = c.getParents();
+                if(parents != null) {
+                    queue1.addAll(parents);
+                }
+            }
+        //找相同祖先
+            Queue<String> queue2 = new LinkedList<>();
+            queue2.add(CommitId2);
+            while(!queue2.isEmpty()) {
+                String id = queue2.poll();
+                if(ancestor1.contains(id)) {
+                    return id;
+                }
+                Commit c = Commit.readCommit(id);
+                List<String> parents = c.getParents();
+                if(parents != null) {
+                    queue2.addAll(parents);
+                }
+            }
+            return null;
         }
     }
 
