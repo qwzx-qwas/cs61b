@@ -427,6 +427,7 @@ public class Repository {
         }
 
         public static void merge(String branchName) {
+            boolean hasConflicts = false;
             HashMap<String, String> mergedSnapshot = new HashMap<>();
             Stage stage = Utils.readObject(STAGE_DIR,Stage.class);
             // 如果存在任何暂存的添加或删除
@@ -491,14 +492,20 @@ public class Repository {
                 boolean inCurr = (currentHash != null);
                 boolean inDist = (distHash != null);
                 boolean inSplit = (splitHash != null);
+                if (splitHash.equals(distHash) && splitHash.equals(currentHash)) {
+                    mergedSnapshot.put(file, currentHash);
+                    continue;
+                }
                 //只在“给定分支”里改动了文件,split和current一样，和dist不一样
                 if(splitHash.equals(currentHash) && !splitHash.equals(distHash)) {
                     checkoutFromCommit(distCommitId,file);
                     Stage.stageForAdd(file,distHash);
+                    mergedSnapshot.put(file, distHash);
                     continue;
                 }
                 //仅在curr分支中修改
                 if(splitHash.equals(distHash) && !splitHash.equals(currentHash)) {
+                    mergedSnapshot.put(file, currentHash);
                     continue;
                 }
                 //curr和dist都修改或删除
@@ -507,12 +514,14 @@ public class Repository {
                 }
                 //只在当前分支中新增
                 if(inCurr && !inSplit && !inDist) {
+                    mergedSnapshot.put(file, currentHash);
                     continue;
                 }
                 // 仅给定分支新增
                 if(inDist && !inSplit && !inCurr) {
                     checkoutFromCommit(distCommitId,file);
                     Stage.stageForAdd(file,splitHash);
+                    mergedSnapshot.put(file, distHash);
                     continue;
                 }
                 //当前未修改，给定删除（要删除）
@@ -527,6 +536,7 @@ public class Repository {
                     continue;
                 }
                 //其余为冲突
+                hasConflicts = true;
                 String currentContent;
                 String distContent;
                 if (inCurr) {
@@ -551,12 +561,17 @@ public class Repository {
                 //加入到暂存区
                 String blobId = Utils.sha1(conflictContent);
                 Stage.stageForAdd(file,blobId);
+                mergedSnapshot.put(file, blobId);
             }
             //合并提交
             String mergeMessage = "Merged" + branchName + "into" + HEAD.getCurrentBranchName() + ".";
             List<String> parents = List.of(currentCommitId, distCommitId);
             String currentDate = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy Z").format(new Date());
-            Commit mergeCommit = new Commit(mergeMessage,currentDate,)
+            Commit mergeCommit = new Commit(mergeMessage,currentDate,mergedSnapshot,parents);
+            Utils.writeContents(COMMITS_DIR,mergeCommit);
+            if(hasConflicts) {
+                System.out.println("Encountered a merge conflict." );
+            }
         }
 
         public static String getSplitPoint(String CommitId1,String CommitId2) {
