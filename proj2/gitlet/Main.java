@@ -1,5 +1,6 @@
 package gitlet;
 
+import java.io.File;
 import java.io.IOException;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
@@ -15,16 +16,17 @@ public class Main {
         //if args is empty
         checkMain(args);
         String firstArg = args[0];
+        if(firstArg !="init") {
+            checkInitialized();
+        }
         switch(firstArg) {
             case "init":
-                // TODO: handle the `init` command
                 /** check the length of args*/
                 checkArgs(args,1);
                 //调用Repository中的init的核心逻辑
                 Repository.init();
                 break;
             case "add":
-                // TODO: handle the `add [filename]` command
                 checkArgs(args,2);
                 String fileName = args[1];
                 Repository.add(fileName);
@@ -86,8 +88,8 @@ public class Main {
                 Repository.merge(args[1]);
                 break;
             default:
-
-
+                System.out.println("No command with that name exists.");
+                System.exit(0);
         }
 
     }
@@ -103,6 +105,14 @@ public class Main {
     private static void checkArgs(String[] args,int num) {
         if (args.length != num) {
             System.out.println("Incorrect operands.");
+            System.exit(0);
+        }
+    }
+    private static final File GITLET_DIR = new File(".gitlet");
+
+    public static void checkInitialized() {
+        if (!GITLET_DIR.exists()) {
+            System.out.println("Not in an initialized Gitlet directory.");
             System.exit(0);
         }
     }
