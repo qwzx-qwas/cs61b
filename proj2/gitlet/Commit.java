@@ -1,6 +1,6 @@
 package gitlet;
 
-// TODO: any imports you need here
+
 
 import java.io.*;
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import java.util.List;
 import static gitlet.Repository.COMMITS_DIR;
 
 /** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
+ *
  *  does at a high level.
  *一个提交将仅仅由以下部分组成：
  *
@@ -24,11 +24,10 @@ import static gitlet.Repository.COMMITS_DIR;
  * 一个父引用（指向其直接祖先）。
  *
  * 以及，对于合并提交，一个第二个父引用。
- *  @author TODO
+ *  @author
  */
 public class Commit implements Serializable {
     /**
-     * TODO: add instance variables here.
      * String message
      * Date commitDate
      * Commit parent
@@ -49,7 +48,6 @@ public class Commit implements Serializable {
     //存放直接父级的ID
     private List<String> parents;
 
-    /* TODO: fill in the rest of this class. */
     /** 创建一个Commit 实例*/
 
     public Commit(String message,String commitDate,HashMap<String,String> file,List<String> parents) {

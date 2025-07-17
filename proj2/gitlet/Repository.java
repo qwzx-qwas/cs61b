@@ -7,17 +7,16 @@ import java.util.*;
 import static gitlet.HEAD.getHeadCommitId;
 import static gitlet.Utils.*;
 
-// TODO: any imports you need here
 
 /** Represents a gitlet repository.
- *  TODO: It's a good idea to give a description here of what else this Class
+ *
  *  does at a high level.
  *
- *  @author TODO
+ *  @author
  */
 public class Repository {
     /**
-     * TODO: add instance variables here.
+     *
      *Repository 类是 Gitlet 系统的核心业务逻辑层。它不直接存储数据，
      * 而是充当一个服务层，协调和管理其他数据实体（如 Commit 对象、Blob 对象、分支引用）的创建、读取、更新和删除，
      * 从而实现整个版本控制系统的功能。
@@ -61,7 +60,6 @@ public class Repository {
     public static final File HEAD_DIR = join(HEADS_DIR, "HEAD");
 
     public static final File STAGE_DIR = join(GITLET_DIR, "stage");
-    /* TODO: fill in the rest of this class. */
 
     public static void checkGitletDir() {
         if(GITLET_DIR.exists()) {
@@ -72,7 +70,7 @@ public class Repository {
         }
     }
 
-    public static void init() throws IOException {
+    public static void init() {
         /** 创建一个隐藏的 .gitlet/ 文件夹（检查该文件夹是否存在) */
         checkGitletDir();
         /**创构建基本目录框架*/
@@ -101,14 +99,7 @@ public class Repository {
         String initialCommitId = Utils.sha1(initial);
         File commitFile = new File(COMMITS_DIR, initialCommitId);
 
-        FileOutputStream fos = new FileOutputStream(commitFile);
-         //缓冲输出流
-         BufferedOutputStream bos = new BufferedOutputStream(fos);
-         //把Java对象序列化
-         ObjectOutputStream oos = new ObjectOutputStream(bos);
-         //oos写入至文档initialSnapshot
-         oos.writeObject(initialSnapshot);
-         oos.close();
+        Utils.writeObject(commitFile, initial);
         //创建HEAD文件,设置 HEAD 内容为 "refs/heads/master"
         Utils.writeContents(HEAD_DIR, "refs/heads/master");
         /** 创建master分支，指向initialCommit*/
