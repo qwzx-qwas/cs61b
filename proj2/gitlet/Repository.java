@@ -170,7 +170,8 @@ public class Repository {
             newSnapshot.remove(fileName);
         }
         //获取当前时间
-        String currentDate = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy Z").format(new Date());
+        SimpleDateFormat sdf = new SimpleDateFormat(" EEE MMM dd HH:mm:ss yyyy Z", Locale.US);
+        String currentDate = sdf.format(new Date());
         //构造新的commit并保存到文件中
         Commit currentCommit = new Commit(message, currentDate, newSnapshot, parents);
         String currentCommitId = Utils.sha1(Utils.serialize(currentCommit));
@@ -571,7 +572,7 @@ public class Repository {
         //合并提交
         String mergeMessage = "Merged " + branchName + " into " + HEAD.getCurrentBranchName() + ".";
         List<String> parents = List.of(currentCommitId, distCommitId);
-        String currentDate = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy Z").format(new Date());
+        String currentDate = new SimpleDateFormat(" EEE MMM dd HH:mm:ss yyyy Z").format(new Date());
         Commit mergeCommit = new Commit(mergeMessage, currentDate, mergedSnapshot, parents);
         String mergeCommitId = Utils.sha1(Utils.serialize(mergeCommit));
         File commitFile = Utils.join(COMMITS_DIR, mergeCommitId);

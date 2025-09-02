@@ -2,6 +2,7 @@ package gitlet;
 
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -64,7 +65,8 @@ public class Commit implements Serializable {
         this.message = message;
         this.fileSnapshot = file;
         this.commitDate = commitDate;
-        this.parents = parents;
+        //如果parent传进来的是null，就用一个空列表代替
+        this.parents = (parents == null) ? new ArrayList<String>() : parents;
     }
 
     //使用getter进行封装
@@ -102,11 +104,9 @@ public class Commit implements Serializable {
     public static void printCommit(Commit commit, String commitId) {
         System.out.println();
         System.out.println("===");
-        System.out.println("commitId:" + commitId);
+        System.out.println("commit " + commitId);
         System.out.println("Date:" + commit.getCommitDate());
         System.out.println(commit.getMessage());
-        System.out.println();
-        System.out.println();
     }
 
     //通过一截commitId来找到commit
