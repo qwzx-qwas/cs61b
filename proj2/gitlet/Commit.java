@@ -102,11 +102,12 @@ public class Commit implements Serializable {
     }
 
     public static void printCommit(Commit commit, String commitId) {
-        System.out.println();
+
         System.out.println("===");
         System.out.println("commit " + commitId);
-        System.out.println("Date:" + commit.getCommitDate());
+        System.out.println("Date: " + commit.getCommitDate());
         System.out.println(commit.getMessage());
+        System.out.println();
     }
 
     //通过一截commitId来找到commit

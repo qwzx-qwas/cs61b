@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.*;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -76,7 +77,6 @@ public class Repository {
         }
     }
 
-
     public static void init() {
         /** 创建一个隐藏的 .gitlet/ 文件夹（检查该文件夹是否存在) */
         checkGitletDir();
@@ -99,7 +99,11 @@ public class Repository {
             System.out.println("Error creating stage directory.");
             System.exit(0);
         }
-        String initDate = " 00:00:00 UTC, Thursday, 1 January 1970";
+
+        Date epoch = new Date(0); // Unix Epoch
+        DateFormat dateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.US);
+        String initDate = dateFormat.format(epoch);
+        //String initDate = " 00:00:00 UTC, Thursday, 1 January 1970";
         HashMap<String, String> initialSnapshot = new HashMap<>();
         Commit initial = new Commit("initial commit", initDate, initialSnapshot, null);
 
@@ -170,8 +174,9 @@ public class Repository {
             newSnapshot.remove(fileName);
         }
         //获取当前时间
-        SimpleDateFormat sdf = new SimpleDateFormat(" EEE MMM dd HH:mm:ss yyyy Z", Locale.US);
-        String currentDate = sdf.format(new Date());
+        Date epoch = new Date(); // Unix Epoch
+        DateFormat dateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.US);
+        String currentDate = dateFormat.format(epoch);
         //构造新的commit并保存到文件中
         Commit currentCommit = new Commit(message, currentDate, newSnapshot, parents);
         String currentCommitId = Utils.sha1(Utils.serialize(currentCommit));
@@ -572,7 +577,9 @@ public class Repository {
         //合并提交
         String mergeMessage = "Merged " + branchName + " into " + HEAD.getCurrentBranchName() + ".";
         List<String> parents = List.of(currentCommitId, distCommitId);
-        String currentDate = new SimpleDateFormat(" EEE MMM dd HH:mm:ss yyyy Z").format(new Date());
+        Date epoch = new Date(); // Unix Epoch
+        DateFormat dateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.US);
+        String currentDate = dateFormat.format(epoch);
         Commit mergeCommit = new Commit(mergeMessage, currentDate, mergedSnapshot, parents);
         String mergeCommitId = Utils.sha1(Utils.serialize(mergeCommit));
         File commitFile = Utils.join(COMMITS_DIR, mergeCommitId);
