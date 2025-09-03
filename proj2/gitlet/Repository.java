@@ -244,13 +244,11 @@ public class Repository {
             String currentBranch = HEAD.getCurrentBranchName();
             if (branch.equals(currentBranch)) {
                 System.out.println("*" + branch);
-            }
-        }
-        for (String branch : branchName) {
-            if (!branch.equals(getHeadCommitId())) {
+            } else {
                 System.out.println(branch);
             }
         }
+
         //列出所有已暂存以备添加的文件
         Stage stage = Utils.readObject(STAGE_FILE, Stage.class);
         List<String> addedFiles = new ArrayList<>(stage.getAddedFiles().keySet());
