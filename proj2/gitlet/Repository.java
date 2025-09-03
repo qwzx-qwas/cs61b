@@ -71,7 +71,8 @@ public class Repository {
     public static void checkGitletDir() {
         if (GITLET_DIR.exists()) {
             //如果当前目录中已经存在一个 Gitlet 版本控制系统，程序应该终止并不覆盖现有系统。此时应打印错误消息
-            System.out.println("A Gitlet version-control system already exists in the current directory.");
+            System.out.println("A Gitlet version-control system already "
+                    + "exists in the current directory.");
             //并终止程序进行
             System.exit(0);
         }
@@ -244,7 +245,7 @@ public class Repository {
             String currentBranch = HEAD.getCurrentBranchName();
             if (branch.equals(currentBranch)) {
                 System.out.println("*" + branch);
-            } else {
+            } else if (!branch.equals("HEAD")) {  // 直接跳过 HEAD 文件
                 System.out.println(branch);
             }
         }
@@ -276,13 +277,14 @@ public class Repository {
             File fileINCWD = new File(CWD, file);
             //如果工作目录下的文件已经被删除，而缓存区中仍有 or 如果工作目录下的文件已经被删除,而原先commit仍有
             if (!fileINCWD.exists()) {
-                if (stage.getAddedFiles().containsKey(file) || HEAD.getHeadCommit().getBlobId(file) != null) {
+                if (stage.getAddedFiles().containsKey(file)
+                        || HEAD.getHeadCommit().getBlobId(file) != null) {
                     System.out.println(file + "(deleted)");
                 }
             } else {
                 String currentId = Utils.sha1(readContents(fileINCWD));
-                String IdInStage = stage.getAddedFiles().get(file);
-                if (!currentId.equals(IdInStage)) {
+                String idInStage = stage.getAddedFiles().get(file);
+                if (!currentId.equals(idInStage)) {
                     System.out.println(file + "(modified)");
                 }
             }
@@ -292,17 +294,18 @@ public class Repository {
         System.out.println("=== Untracked Files ===");
         List<String> result = new ArrayList<>();
         //获取CWD下所有文件名字
-        List<String> CWDFileNameList = Utils.plainFilenamesIn(CWD);
-        Collections.sort(CWDFileNameList);
+        List<String> cwdFileNameList = Utils.plainFilenamesIn(CWD);
+        Collections.sort(cwdFileNameList);
         Commit head = HEAD.getHeadCommit();
         Map<String, String> tracked = head.getFileSnapshot();
-        for (String CWDFileName : CWDFileNameList) {
+        for (String CWDFileName : cwdFileNameList) {
             File file = new File(CWD, CWDFileName);
             if (!file.exists()) {
                 continue;
             }
             //既未暂存以备添加也未被跟踪的文件
-            boolean untracked = !tracked.containsKey(CWDFileName) && !stage.getAddedFiles().containsKey(CWDFileName);
+            boolean untracked = !tracked.containsKey(CWDFileName)
+                    && !stage.getAddedFiles().containsKey(CWDFileName);
             //还有已被暂存以备移除，但又被创建
             if (untracked || stage.getRemovedFiles().contains(CWDFileName)) {
                 result.add(CWDFileName);
@@ -349,8 +352,10 @@ public class Repository {
         List<String> cwdFileNameList = Utils.plainFilenamesIn(CWD);
         for (String cwdFileName : cwdFileNameList) {
             //当前没有，而目标分支有
-            if (distSnapshot.containsKey(cwdFileName) && !currentSnapshot.containsKey(cwdFileName)) {
-                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            if (distSnapshot.containsKey(cwdFileName)
+                    && !currentSnapshot.containsKey(cwdFileName)) {
+                System.out.println("There is an untracked file in the way;"
+                        + " delete it, or add and commit it first.");
                 System.exit(0);
             }
         }
@@ -469,8 +474,10 @@ public class Repository {
         List<String> cwdFileNameList = Utils.plainFilenamesIn(CWD);
         for (String cwdFileName : cwdFileNameList) {
             //当前没有，而目标分支有
-            if (distSnapshot.containsKey(cwdFileName) && !currentSnapshot.containsKey(cwdFileName)) {
-                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            if (distSnapshot.containsKey(cwdFileName)
+                    && !currentSnapshot.containsKey(cwdFileName)) {
+                System.out.println("There is an untracked file in the way; delete it, "
+                        + "or add and commit it first.");
                 System.exit(0);
             }
         }
@@ -560,9 +567,9 @@ public class Repository {
             } else {
                 distContent = "";
             }
-            String conflictContent = "<<<<<<< HEAD\n" + currentContent +
-                    "=======\n" + distContent +
-                    ">>>>>>>\n";
+            String conflictContent = "<<<<<<< HEAD\n" + currentContent
+                    + "=======\n" + distContent
+                    + ">>>>>>>\n";
             //把合并后的冲突内容写进工作目录的对应文件。
             //相当于创建了一个“带冲突提示”的版本，让用户知道该手动解决
             File conflictFile = Utils.join(CWD, file);
@@ -588,12 +595,12 @@ public class Repository {
         }
     }
 
-    public static String getSplitPoint(String CommitId1, String CommitId2) {
+    public static String getSplitPoint(String commitId1, String commitId2) {
         //用集合记录commitId1家谱中所有祖先的ID
         Set<String> ancestor1 = new HashSet<>();
         //BFS实现遍历，记录全部祖先
         Queue<String> queue1 = new LinkedList<>();
-        queue1.add(CommitId1);
+        queue1.add(commitId1);
         while (!queue1.isEmpty()) {
             //获取第一个，并删除
             String id = queue1.poll();
@@ -605,7 +612,7 @@ public class Repository {
         }
         //找相同祖先
         Queue<String> queue2 = new LinkedList<>();
-        queue2.add(CommitId2);
+        queue2.add(commitId2);
         while (!queue2.isEmpty()) {
             String id = queue2.poll();
             if (ancestor1.contains(id)) {
