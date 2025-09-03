@@ -235,10 +235,7 @@ public class Repository {
         }
     }
 
-    public static void status() {
-        //列出所有分支
-        List<String> branchName = Utils.plainFilenamesIn(HEADS_DIR);
-        Collections.sort(branchName);
+    public static void printBranch(List<String> branchName) {
         System.out.println("=== Branches ===");
         for (String branch : branchName) {
             //当前活跃的分支前加*
@@ -249,25 +246,40 @@ public class Repository {
                 System.out.println(branch);
             }
         }
+    }
 
-        //列出所有已暂存以备添加的文件
-        Stage stage = Utils.readObject(STAGE_FILE, Stage.class);
-        List<String> addedFiles = new ArrayList<>(stage.getAddedFiles().keySet());
+    public static void printStageFile(List<String> addedFiles) {
         System.out.println();
-
         System.out.println("=== Staged Files ===");
         Collections.sort(addedFiles);
         for (String addedFile : addedFiles) {
             System.out.println(addedFile);
         }
-        //列出所有已暂存以备移除的文件
-        System.out.println();
+    }
 
+    public static void printRemovedFile(List<String> removedFilesList) {
+        System.out.println();
         System.out.println("=== Removed Files ===");
-        List<String> removedFilesList = new ArrayList<>(stage.getRemovedFiles());
+
         for (String removedFile : removedFilesList) {
             System.out.println(removedFile);
         }
+    }
+
+    public static void status() {
+        //列出所有分支
+        List<String> branchName = Utils.plainFilenamesIn(HEADS_DIR);
+        Collections.sort(branchName);
+        printBranch(branchName);
+
+        //列出所有已暂存以备添加的文件
+        Stage stage = Utils.readObject(STAGE_FILE, Stage.class);
+        List<String> addedFiles = new ArrayList<>(stage.getAddedFiles().keySet());
+        printStageFile(addedFiles);
+
+        //列出所有已暂存以备移除的文件
+        List<String> removedFilesList = new ArrayList<>(stage.getRemovedFiles());
+        printRemovedFile(removedFilesList);
         System.out.println();
 
         System.out.println("=== Modifications Not Staged For Commit ===");
@@ -298,17 +310,17 @@ public class Repository {
         Collections.sort(cwdFileNameList);
         Commit head = HEAD.getHeadCommit();
         Map<String, String> tracked = head.getFileSnapshot();
-        for (String CWDFileName : cwdFileNameList) {
-            File file = new File(CWD, CWDFileName);
+        for (String cwdFileName : cwdFileNameList) {
+            File file = new File(CWD, cwdFileName);
             if (!file.exists()) {
                 continue;
             }
             //既未暂存以备添加也未被跟踪的文件
-            boolean untracked = !tracked.containsKey(CWDFileName)
-                    && !stage.getAddedFiles().containsKey(CWDFileName);
+            boolean untracked = !tracked.containsKey(cwdFileName)
+                    && !stage.getAddedFiles().containsKey(cwdFileName);
             //还有已被暂存以备移除，但又被创建
-            if (untracked || stage.getRemovedFiles().contains(CWDFileName)) {
-                result.add(CWDFileName);
+            if (untracked || stage.getRemovedFiles().contains(cwdFileName)) {
+                result.add(cwdFileName);
             }
         }
         for (String file : result) {
