@@ -135,24 +135,35 @@ public class Repository {
         String blobId = Utils.sha1(fileContent);
 
         String blobIdInCommit = currentCommit.getBlobId(fileName);
-        //        - 如果一样：从暂存区中移除；
+        Stage stage = Utils.readObject(STAGE_FILE, Stage.class);
+
+        
+        // 情况 1：文件内容和 commit 一样
         if (blobId.equals(blobIdInCommit)) {
-            Stage.removeFromStagingAera(fileName);
-            return;
+            // 如果在 removedFiles 里，移除掉（因为重新 add 了）
+            stage.getRemovedFiles().remove(fileName);
+            // 如果在 stagedForAdd 里，移除掉
+            stage.getAddedFiles().remove(fileName);
+            Utils.writeObject(STAGE_FILE, stage);
+            return; // ✅ 直接返回，不做任何额外动作
         }
-        //  - 如果不一样：复制一份放入暂存区；
+
+        // 情况 2：文件内容不同
+        // 新建 blob 文件
         File blobFile = new File(BLOBS_DIR, blobId);
         if (!blobFile.exists()) {
             Utils.writeContents(blobFile, fileContent);
         }
-        //更新缓存区   如果之前是 rm 过的文件，现在就取消标记；
-        Stage.stageForAdd(fileName, blobId);
+        // 更新 stage
+        stage.getRemovedFiles().remove(fileName); // 确保不在 removed 里
+        stage.getAddedFiles().put(fileName, blobId);
+        Utils.writeObject(STAGE_FILE, stage);
     }
 
     public static void commit(String message) {
         //检查message是否为空
         if (message == null || message.equals("")) {
-            System.out.println("Commit message is null.");
+            System.out.println("Please enter a commit message.");
             System.exit(0);
         }
         //检查缓存区是否为空
