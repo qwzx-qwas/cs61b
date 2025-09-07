@@ -526,6 +526,7 @@ public class Repository {
         }
         String split = getSplitPoint(currentCommitId, distCommitId);
         //如果splitPoint（最新共同祖先）与给定分支的头部是同一个提交
+
         if (split.equals(distCommitId)) {
             System.out.println("Given branch is an ancestor of the current branch.");
             System.exit(0);
@@ -551,24 +552,27 @@ public class Repository {
             boolean inCurr = (currentHash != null);
             boolean inDist = (distHash != null);
             boolean inSplit = (splitHash != null);
-            if (splitHash.equals(distHash) && splitHash.equals(currentHash)) {
+
+            if (Objects.equals(splitHash, distHash)
+                    && Objects.equals(splitHash, currentHash)) {
                 mergedSnapshot.put(file, currentHash);
                 continue;
             }
             //只在“给定分支”里改动了文件,split和current一样，和dist不一样
-            if (splitHash.equals(currentHash) && !splitHash.equals(distHash)) {
+            if (Objects.equals(splitHash,currentHash)
+                    && !Objects.equals(splitHash,distHash)) {
                 checkoutFromCommit(distCommitId, file);
                 Stage.stageForAdd(file, distHash);
                 mergedSnapshot.put(file, distHash);
                 continue;
             }
             //仅在curr分支中修改
-            if (splitHash.equals(distHash) && !splitHash.equals(currentHash)) {
+            if (Objects.equals(splitHash,distHash) && !Objects.equals(splitHash,currentHash)) {
                 mergedSnapshot.put(file, currentHash);
                 continue;
             }
             //curr和dist都修改或删除
-            if (currentHash.equals(distHash)) {
+            if (Objects.equals(currentHash,distHash)) {
                 continue;
             }
             //只在当前分支中新增
@@ -579,19 +583,19 @@ public class Repository {
             // 仅给定分支新增
             if (inDist && !inSplit && !inCurr) {
                 checkoutFromCommit(distCommitId, file);
-                Stage.stageForAdd(file, splitHash);
+                Stage.stageForAdd(file, distHash);
                 mergedSnapshot.put(file, distHash);
                 continue;
             }
             //当前未修改，给定删除（要删除）
-            if (inSplit && splitHash.equals(currentHash) && !inDist) {
+            if (inSplit && Objects.equals(splitHash,currentHash) && !inDist) {
                 //删除 + 取消跟踪（即移除暂存记录）
                 File newFile = Utils.join(CWD, file);
                 newFile.delete();
                 continue;
             }
             //给定未修改，当前删除
-            if (distHash.equals(splitHash) && !inCurr) {
+            if (Objects.equals(distHash,splitHash) && !inCurr) {
                 continue;
             }
             //其余为冲突
@@ -631,7 +635,7 @@ public class Repository {
         Commit mergeCommit = new Commit(mergeMessage, currentDate, mergedSnapshot, parents);
         String mergeCommitId = Utils.sha1(Utils.serialize(mergeCommit));
         File commitFile = Utils.join(COMMITS_DIR, mergeCommitId);
-        Utils.writeContents(commitFile, mergeCommitId);
+        Utils.writeObject(commitFile, mergeCommitId);
         HEAD.updateHeadCommit(mergeCommitId);
         if (hasConflicts) {
             System.out.println("Encountered a merge conflict.");
