@@ -364,12 +364,12 @@ public class Repository {
             System.exit(0);
         }
         //检查是否为当前分支
-        /*
+
         String currentBranch = HEAD.getCurrentBranchName();
         if (currentBranch != null && currentBranch.equals(branchName)) {
-            System.out.println("No need to checkout the current branch");
+            System.out.println("No need to checkout the current branch.");
             System.exit(0);
-        }*/
+        }
         String distCommitId = Utils.readContentsAsString(distBranch).trim();
         Commit distCommit = Commit.readCommit(distCommitId);
         //检查加覆盖CWD中的文件加清除缓存
