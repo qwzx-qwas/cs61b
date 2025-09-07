@@ -33,6 +33,11 @@ public class HEAD {
 
     public static String getCurrentBranchName() {
         String refsPath = Utils.readContentsAsString(HEAD_DIR).trim();
-        return refsPath.substring(refsPath.lastIndexOf("/") + 1);
+        if (refsPath.startsWith("refs/heads/")) {
+            return refsPath.substring("refs/heads/".length());
+        } else {
+            // detached HEAD 状态，返回 null 或特殊标记
+            return null;
+        }
     }
 }
