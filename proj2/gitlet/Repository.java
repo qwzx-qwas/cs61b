@@ -137,7 +137,7 @@ public class Repository {
         String blobIdInCommit = currentCommit.getBlobId(fileName);
         Stage stage = Utils.readObject(STAGE_FILE, Stage.class);
 
-        
+
         // 情况 1：文件内容和 commit 一样
         if (blobId.equals(blobIdInCommit)) {
             // 如果在 removedFiles 里，移除掉（因为重新 add 了）
@@ -145,7 +145,7 @@ public class Repository {
             // 如果在 stagedForAdd 里，移除掉
             stage.getAddedFiles().remove(fileName);
             Utils.writeObject(STAGE_FILE, stage);
-            return; // ✅ 直接返回，不做任何额外动作
+            return; //  直接返回，不做任何额外动作
         }
 
         // 情况 2：文件内容不同
@@ -202,15 +202,30 @@ public class Repository {
     public static void rm(String fileName) {
         Commit currentCommit = HEAD.getHeadCommit();
         Stage stage = Utils.readObject(STAGE_FILE, Stage.class);
-        Stage.stageForRemove(fileName);
-        if (currentCommit.getFileSnapshot().containsKey(fileName)) {
+
+        boolean staged = stage.getAddedFiles().containsKey(fileName);
+        boolean tracked = currentCommit.getFileSnapshot().containsKey(fileName);
+
+        if (!staged && !tracked) {
+            System.out.println("No reason to remove the file.");
+            return;
+        }
+
+        // 如果在 stageForAdd 里，移除它
+        if (staged) {
+            stage.getAddedFiles().remove(fileName);
+        }
+
+        // 如果在当前 commit 里，说明是被追踪的文件 → 进入 stageForRemove
+        if (tracked) {
             stage.getRemovedFiles().add(fileName);
-            //看工作路径上是否存在该文件，有就删去
             File fileINCWD = new File(fileName);
             if (fileINCWD.exists()) {
                 fileINCWD.delete();
             }
         }
+
+        Utils.writeObject(STAGE_FILE, stage);
     }
 
     public static void log() {
@@ -345,7 +360,7 @@ public class Repository {
         File distBranch = Utils.join(HEADS_DIR, branchName);
         //是否存在该branch
         if (!distBranch.exists()) {
-            System.out.println(" No such branch exists.");
+            System.out.println("No such branch exists.");
             System.exit(0);
         }
         //检查是否为当前分支
@@ -412,6 +427,10 @@ public class Repository {
 
     public static void checkoutFromCommit(String commitId, String fileName) {
         String shortCommitId = Commit.resolveFullCommitId(commitId);
+        if (shortCommitId == null) {
+            System.out.println("No commit with that id exists.");
+            System.exit(0);
+        }
         Commit distCommit = Commit.readCommit(shortCommitId);
         if (distCommit == null) {
             System.out.println("No commit with that id exists.");
