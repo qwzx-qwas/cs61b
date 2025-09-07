@@ -375,7 +375,7 @@ public class Repository {
         //检查加覆盖CWD中的文件加清除缓存
         Repository.checkoutCommit(distCommit);
         //更新HEAD
-        Utils.writeContents(HEAD_DIR,"refs/heads/" + branchName);
+        Utils.writeContents(HEAD_DIR, "refs/heads/" + branchName);
     }
 
     public static void checkoutCommit(Commit distCommit) {
@@ -478,9 +478,29 @@ public class Repository {
 
     //跟checkout差不多，不过输入是commitId
     public static void reset(String commitId) {
-        Commit commit = Commit.readCommit(commitId);
-        checkoutCommit(commit);
+        File commitFile = Utils.join(COMMITS_DIR, commitId);
+        if (!commitFile.exists()) {
+            System.out.println("No commit with that id exists.");
+            System.exit(0);
+        }
+
+        Commit targetCommit = Commit.readCommit(commitId);
+        Commit currentCommit = HEAD.getHeadCommit();
+
+        // 2. 检查 untracked 文件
+        for (String fileName : plainFilenamesIn(CWD)) {
+            // 如果文件在当前 commit 没有被追踪，但是目标 commit 里有（要覆盖）
+            if (currentCommit.getBlobId(fileName) == null
+                    && targetCommit.getBlobId(fileName) != null) {
+                System.out.println("There is an untracked file in the way; " +
+                        "delete it, or add and commit it first.");
+                System.exit(0);
+            }
+        }
+
+        checkoutCommit(targetCommit);
         HEAD.updateHeadCommit(commitId);
+        Stage.clearStagingAera();
     }
 
     public static void merge(String branchName) {
@@ -499,7 +519,7 @@ public class Repository {
             System.exit(0);
         }
         //尝试将分支与其自身合并会显示错误消息“Cannot merge a branch with itself.”（无法将分支与自身合并）。
-        if (branchName.equals(HEAD.getCurrentBranchName())) {
+        if (Objects.equals(branchName, HEAD.getCurrentBranchName())) {
             System.out.println("Cannot merge a branch with itself.");
             System.exit(0);
         }
@@ -527,14 +547,16 @@ public class Repository {
         String split = getSplitPoint(currentCommitId, distCommitId);
         //如果splitPoint（最新共同祖先）与给定分支的头部是同一个提交
 
-        if (split.equals(distCommitId)) {
+        if (split != null && split.equals(distCommitId)) {
             System.out.println("Given branch is an ancestor of the current branch.");
             System.exit(0);
         }
         //如果splitPoint与当前分支的头部是同一个提交，Gitlet 会执行“快进”合并
-        if (split.equals(currentCommitId)) {
+        if (split != null && split.equals(currentCommitId)) {
             System.out.println("Current branch fast-forwarded.");
             HEAD.updateHeadCommit(distCommitId);
+            checkoutCommit(distCommit);
+            System.exit(0);
         }
         Commit splitedCommit = Commit.readCommit(split);
         Map<String, String> splitSnapshot = splitedCommit.getFileSnapshot();
@@ -559,20 +581,21 @@ public class Repository {
                 continue;
             }
             //只在“给定分支”里改动了文件,split和current一样，和dist不一样
-            if (Objects.equals(splitHash,currentHash)
-                    && !Objects.equals(splitHash,distHash)) {
+            if (Objects.equals(splitHash, currentHash)
+                    && !Objects.equals(splitHash, distHash)) {
                 checkoutFromCommit(distCommitId, file);
                 Stage.stageForAdd(file, distHash);
                 mergedSnapshot.put(file, distHash);
                 continue;
             }
             //仅在curr分支中修改
-            if (Objects.equals(splitHash,distHash) && !Objects.equals(splitHash,currentHash)) {
+            if (Objects.equals(splitHash, distHash)
+                    && !Objects.equals(splitHash, currentHash)) {
                 mergedSnapshot.put(file, currentHash);
                 continue;
             }
             //curr和dist都修改或删除
-            if (Objects.equals(currentHash,distHash)) {
+            if (Objects.equals(currentHash, distHash)) {
                 continue;
             }
             //只在当前分支中新增
@@ -588,14 +611,15 @@ public class Repository {
                 continue;
             }
             //当前未修改，给定删除（要删除）
-            if (inSplit && Objects.equals(splitHash,currentHash) && !inDist) {
+            if (inSplit && Objects.equals(splitHash, currentHash) && !inDist) {
                 //删除 + 取消跟踪（即移除暂存记录）
+                mergedSnapshot.remove(file);
                 File newFile = Utils.join(CWD, file);
                 newFile.delete();
                 continue;
             }
             //给定未修改，当前删除
-            if (Objects.equals(distHash,splitHash) && !inCurr) {
+            if (Objects.equals(distHash, splitHash) && !inCurr) {
                 continue;
             }
             //其余为冲突
@@ -622,7 +646,10 @@ public class Repository {
             File conflictFile = Utils.join(CWD, file);
             Utils.writeContents(conflictFile, conflictContent);
             //加入到暂存区
+
             String blobId = Utils.sha1(conflictContent);
+            File blobFIle = Utils.join(BLOBS_DIR, blobId);
+            Utils.writeContents(blobFIle, conflictContent);
             Stage.stageForAdd(file, blobId);
             mergedSnapshot.put(file, blobId);
         }
@@ -635,7 +662,7 @@ public class Repository {
         Commit mergeCommit = new Commit(mergeMessage, currentDate, mergedSnapshot, parents);
         String mergeCommitId = Utils.sha1(Utils.serialize(mergeCommit));
         File commitFile = Utils.join(COMMITS_DIR, mergeCommitId);
-        Utils.writeObject(commitFile, mergeCommitId);
+        Utils.writeObject(commitFile, mergeCommit);
         HEAD.updateHeadCommit(mergeCommitId);
         if (hasConflicts) {
             System.out.println("Encountered a merge conflict.");
