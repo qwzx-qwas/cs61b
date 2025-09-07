@@ -545,14 +545,17 @@ public class Repository {
             }
         }
         String split = getSplitPoint(currentCommitId, distCommitId);
+        if (split == null) {
+            throw new IllegalStateException("Split point not found");
+        }
         //如果splitPoint（最新共同祖先）与给定分支的头部是同一个提交
 
-        if (split != null && split.equals(distCommitId)) {
+        if (split.equals(distCommitId)) {
             System.out.println("Given branch is an ancestor of the current branch.");
             System.exit(0);
         }
         //如果splitPoint与当前分支的头部是同一个提交，Gitlet 会执行“快进”合并
-        if (split != null && split.equals(currentCommitId)) {
+        if (split.equals(currentCommitId)) {
             System.out.println("Current branch fast-forwarded.");
             HEAD.updateHeadCommit(distCommitId);
             checkoutCommit(distCommit);
